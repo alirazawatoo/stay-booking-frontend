@@ -213,6 +213,7 @@ const RentalManagement = () => {
         </Pagination>
 
         <UploadRentalModal
+          key={isUploadModalOpen ? 'open' : 'closed'}
           isOpen={isUploadModalOpen}
           onClose={() => setUploadModalOpen(false)}
           onUpload={handleUploadRental}

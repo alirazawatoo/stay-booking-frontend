@@ -39,6 +39,7 @@ const LeaseTable: React.FC<LeaseTableProps> = ({ leases = [], onUpdate }) => {
       </table>
 
       <UploadLeaseModal
+        key={editingLease?.id ?? 'closed'}
         isOpen={editingLease !== null}
         onClose={() => setEditingLease(null)}
         leaseData={editingLease}

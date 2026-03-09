@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Modal from './Modal';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'react-toastify';
@@ -48,12 +48,6 @@ const UploadRentalModal: React.FC<UploadRentalModalProps> = ({ isOpen, onClose, 
       toast.error('Failed to upload rental data file.');
     }
   };
-
-  useEffect(() => {
-    if (!isOpen) {
-      setFiles([]);
-    }
-  }, [isOpen]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Upload Deals">

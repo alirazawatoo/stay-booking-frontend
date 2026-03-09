@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import Modal from './Modal';
 import { Lease } from '../types/leaseTypes';
 import { useDropzone } from 'react-dropzone';
@@ -36,23 +36,19 @@ const UploadLeaseModal: React.FC<UploadLeaseModalProps> = ({
   isEditMode = false,
 }) => {
   const [files, setFiles] = useState<File[]>([]);
-  const [address, setAddress] = useState<Address>(EMPTY_ADDRESS);
+  // Callers remount this modal (via key) for each lease, so the form starts from its props.
+  const [address, setAddress] = useState<Address>(() =>
+    leaseData
+      ? {
+          address1: leaseData.address1,
+          address2: leaseData.address2 || '',
+          state: leaseData.state,
+          city: leaseData.city,
+          zip_code: leaseData.zip_code,
+        }
+      : EMPTY_ADDRESS,
+  );
   const [isUploading, setIsUploading] = useState(false);
-
-  useEffect(() => {
-    setFiles([]);
-    setAddress(
-      leaseData
-        ? {
-            address1: leaseData.address1,
-            address2: leaseData.address2 || '',
-            state: leaseData.state,
-            city: leaseData.city,
-            zip_code: leaseData.zip_code,
-          }
-        : EMPTY_ADDRESS,
-    );
-  }, [leaseData]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles((previous) => [...previous, ...acceptedFiles]);

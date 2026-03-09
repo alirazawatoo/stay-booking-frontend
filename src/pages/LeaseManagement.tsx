@@ -104,6 +104,7 @@ const LeaseManagement = () => {
         <Pagination page={page} hasNext={Boolean(current?.next)} onPageChange={setPage} />
 
         <UploadLeaseModal
+          key={isUploadModalOpen ? 'open' : 'closed'}
           isOpen={isUploadModalOpen}
           onClose={() => setUploadModalOpen(false)}
           onUpload={handleUploadLease}
