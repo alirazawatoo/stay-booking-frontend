@@ -3,6 +3,7 @@ import React from 'react';
 import { Lease } from '../types/leaseTypes';
 import { PencilIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import { formatAddress } from '@/utils/format';
 
 interface LeaseRowProps {
   lease: Lease;
@@ -23,7 +24,7 @@ const LeaseRow: React.FC<LeaseRowProps> = ({ lease, index, onEditClick }) => {
     <tr onClick={handleRowClick} className="hover:bg-gray-50 cursor-pointer">
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{index}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{lease.date}</td>
-      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{lease.address1 + ' ' + lease.address2}</td>
+      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{formatAddress(lease.address1, lease.address2)}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{lease.city}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{lease.state}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{lease.zip_code}</td>

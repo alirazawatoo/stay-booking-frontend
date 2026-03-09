@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { formatLocalDate } from '@/utils/dates';
 
 interface RegulationSearchBarProps {
   onSearch: (filters: RegulationSearchFilters) => void;
@@ -29,11 +30,8 @@ const RegulationSearchBar: React.FC<RegulationSearchBarProps> = ({ onSearch }) =
       setError(null); // Clear any previous error
     }
     
-    const formattedStartDate = startDate ? new Date(startDate.getTime() + 86399999).toISOString().split('T')[0] : undefined;
-
-    const formattedEndDate = endDate 
-      ? new Date(endDate.getTime() + 86399999).toISOString().split('T')[0] 
-      : undefined;
+    const formattedStartDate = startDate ? formatLocalDate(startDate) : undefined;
+    const formattedEndDate = endDate ? formatLocalDate(endDate) : undefined;
     onSearch({ query, status, startDate: formattedStartDate, endDate: formattedEndDate });
   };
 

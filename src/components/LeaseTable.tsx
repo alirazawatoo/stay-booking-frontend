@@ -63,7 +63,7 @@ const LeaseTable: React.FC<LeaseTableProps> = ({ leases = [], onUpdate, onUpdate
             ))
           ) : (
             <tr>
-              <td colSpan={10} className="px-4 py-4 text-center text-gray-500">
+              <td colSpan={9} className="px-4 py-4 text-center text-gray-500">
                 No leases available
               </td>
             </tr>

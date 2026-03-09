@@ -1,6 +1,7 @@
 // RentalRow.tsx
 import React from 'react';
 import { RentalProperty, RentalPropertyStatus } from '../types/rentalTypes';
+import { formatCount, formatCurrency } from '@/utils/format';
 
 interface RentalRowProps {
   rental: RentalProperty;
@@ -14,9 +15,9 @@ const RentalRow: React.FC<RentalRowProps> = ({ rental, onClick}) => {
       {/* <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{index}</td> */}
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{rental.created_at_formatted || 'N/A'}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{rental.location || 'N/A'}</td>
-      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">${rental.rent?.toLocaleString() || 'N/A'}</td>
-      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{rental.no_of_bedrooms || 'N/A'}</td>
-      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">${rental.monthly_estimated_profit?.toLocaleString() || 'N/A'}</td>
+      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{formatCurrency(rental.rent)}</td>
+      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{formatCount(rental.no_of_bedrooms)}</td>
+      <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">{formatCurrency(rental.monthly_estimated_profit)}</td>
       <td className="px-4 md:px-6 py-2 text-sm md:text-base whitespace-nowrap">
         <a 
           href={rental.property_zillow_link}

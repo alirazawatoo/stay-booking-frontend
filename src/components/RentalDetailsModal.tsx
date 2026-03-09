@@ -1,5 +1,6 @@
 import React from "react";
 import { RentalProperty } from "../types/rentalTypes";
+import { formatCurrency } from "@/utils/format";
 
 interface RentalDetailsModalProps {
   rental: RentalProperty | null;
@@ -32,7 +33,7 @@ const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({ rental, onClose
             { label: "Date", value: rental.created_at_formatted },
             { label: "Batch ID", value: rental.batch_id },
             { label: "Location", value: rental.location },
-            { label: "Rent", value: rental.rent },
+            { label: "Rent", value: formatCurrency(rental.rent) },
             { label: "Square Feet", value: rental.square_feet },
             { label: "Bedrooms", value: rental.no_of_bedrooms },
             { label: "Bathrooms", value: rental.no_of_bathrooms },
@@ -49,12 +50,12 @@ const RentalDetailsModal: React.FC<RentalDetailsModalProps> = ({ rental, onClose
                 </a>
               ),
             },
-            { label: "Adr", value: `$${rental.adr || 0}` },
-            { label: "Utilities", value: `$${rental.utilities || 0}` },
-            { label: "Estimated Profit", value: `$${rental.monthly_estimated_profit || 0}` },
-            { label: "Estimated Earnings", value: `$${rental.yearly_projected_revenue || 0}` },
-            { label: "Yearly Rent Cost", value: `$${rental.yearly_rent_cost_util || 0}` },
-            { label: "Occupancy Rate", value: `${rental.occupancy_rate || 0}%` },
+            { label: "Adr", value: formatCurrency(rental.adr) },
+            { label: "Utilities", value: formatCurrency(rental.utilities) },
+            { label: "Estimated Profit", value: formatCurrency(rental.monthly_estimated_profit) },
+            { label: "Estimated Earnings", value: formatCurrency(rental.yearly_projected_revenue) },
+            { label: "Yearly Rent Cost", value: formatCurrency(rental.yearly_rent_cost_util) },
+            { label: "Occupancy Rate", value: rental.occupancy_rate == null ? 'N/A' : `${rental.occupancy_rate}%` },
             { label: "Zillow Property Status", value: rental.property_status },
           ].map((item, idx) => (
             <div key={idx} className="flex justify-between items-center">

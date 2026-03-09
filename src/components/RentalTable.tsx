@@ -100,7 +100,7 @@ const RentalTable: React.FC<RentalTableProps> = ({ rentals = [] }) => {
             ))
           ) : (
             <tr>
-              <td colSpan={8} className="px-4 py-4 text-center text-gray-500">
+              <td colSpan={7} className="px-4 py-4 text-center text-gray-500">
                 No rental properties available
               </td>
             </tr>

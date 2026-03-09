@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { formatLocalDate } from '@/utils/dates';
 
 interface LeaseSearchBarProps {
   onSearch: (filters: LeaseSearchFilters) => void;
@@ -29,12 +30,8 @@ const LeaseSearchBar: React.FC<LeaseSearchBarProps> = ({ onSearch }) => {
       setError(null); // Clear any previous error
     }
   
-    const formattedStartDate = startDate ? new Date(startDate.getTime() + 86399999).toISOString().split('T')[0] : undefined;
-  
-    // Ensure that the end date includes the full day
-    const formattedEndDate = endDate 
-      ? new Date(endDate.getTime() + 86399999).toISOString().split('T')[0] // Adding 23 hours, 59 minutes, 59 seconds
-      : undefined;
+    const formattedStartDate = startDate ? formatLocalDate(startDate) : undefined;
+    const formattedEndDate = endDate ? formatLocalDate(endDate) : undefined;
     onSearch({ address, status, startDate: formattedStartDate, endDate: formattedEndDate });
   };
 

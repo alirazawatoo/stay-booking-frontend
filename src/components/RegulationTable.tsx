@@ -31,7 +31,7 @@ const RegulationTable: React.FC<RegulationTableProps> = ({ regulations = [] }) =
             ))
           ) : (
             <tr>
-              <td colSpan={10} className="px-4 py-4 text-center text-gray-500">
+              <td colSpan={4} className="px-4 py-4 text-center text-gray-500">
                 No regulations available
               </td>
             </tr>
