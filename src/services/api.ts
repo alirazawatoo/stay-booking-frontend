@@ -15,6 +15,7 @@ export const api = createApi({
       return headers
     },
   }),
+  tagTypes: ['Profile'],
   endpoints: (builder) => ({
     // Login mutation to get the token
     login: builder.mutation({
@@ -69,6 +70,7 @@ export const api = createApi({
         method: 'POST',
         body: passwordData,
       }),
+      invalidatesTags: ['Profile'],
     }),
 
     // Password change endpoint (for authenticated users)
@@ -97,6 +99,7 @@ export const api = createApi({
     // Fetch user profile information
     getUserProfile: builder.query({
       query: () => 'account/profile/',
+      providesTags: ['Profile'],
     }),
 
     // Logout endpoint

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLogoutMutation } from '../services/api'; 
+import { api, useLogoutMutation } from '../services/api';
 import { useDispatch } from 'react-redux';
 import { logout as logoutAction } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
@@ -19,10 +19,13 @@ const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ isOpen, onClose, onChan
   const handleLogout = async () => {
     try {
       await logout({}).unwrap();
+    } catch {
+      // An expired or unreachable session must still be cleared on this device.
+    } finally {
       dispatch(logoutAction());
+      // Drop cached profile and lease data so the next account never sees it.
+      dispatch(api.util.resetApiState());
       navigate('/');
-    } catch (error) {
-      console.error('Logout failed:', error);
     }
   };
 

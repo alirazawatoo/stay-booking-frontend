@@ -11,14 +11,21 @@ const UpdatePassword: React.FC = () => {
   const [confirmation, setConfirmation] = useState('');
   const [updatePassword] = useUpdatePasswordMutation();
 
+  const [error, setError] = useState('');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmation) {
+      setError('The two passwords do not match.');
+      return;
+    }
+    setError('');
     try {
       await updatePassword({ id, passwordData: { new_password: password, confirm_password: confirmation } }).unwrap();
       toast.success('Password updated successfully!');
-      navigate('/'); // Redirect to the dashboard or home after updating the password
-    } catch (error) {
-      toast.error('Failed to update password');
+      navigate('/dashboard');
+    } catch {
+      setError('The password could not be updated. It may be too short or too common.');
     }
   };
 
@@ -49,6 +56,7 @@ const UpdatePassword: React.FC = () => {
             </div>
           </div>
           <div><label htmlFor="confirm-password">Confirm new password</label><input id="confirm-password" type="password" autoComplete="new-password" required value={confirmation} onChange={event => setConfirmation(event.target.value)} className="w-full px-3 py-2 border rounded" /></div>
+          {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
           <div>
             <button
               type="submit"
