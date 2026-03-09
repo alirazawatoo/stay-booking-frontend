@@ -21,6 +21,7 @@ playwright-report/
 .env
 .env.*
 !.env.example
+!.env.demo
 *.local
 
 # logs and temp
