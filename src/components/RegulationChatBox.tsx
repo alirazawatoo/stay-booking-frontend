@@ -4,7 +4,6 @@ import { Regulation } from '@/types/regulationTypes';
 import dayjs from 'dayjs';
 import ReactMarkdown from 'react-markdown';
 import RegulationBreadcrumb from './RegulationBreadcrumb';
-import Layout from './Layout';
 
 interface Message {
   text: string;
@@ -67,7 +66,7 @@ const RegulationChatBox: React.FC<RegulationChatBoxProps> = ({ regulation }) => 
           setSummary(response.summary);
         }
         // Store summary created time if available
-        if (data.gpt_response.timestamp) {
+        if (data?.gpt_response?.timestamp) {
           setSummaryCreatedTime(data.gpt_response.timestamp);
         }
 
@@ -96,7 +95,6 @@ const RegulationChatBox: React.FC<RegulationChatBoxProps> = ({ regulation }) => 
 
   // Fetch chat history on load
   useEffect(() => {
-    refetch();
     if (data?.chat_history && Array.isArray(data.chat_history)) {
       setMessages(mapChatHistory(data.chat_history));
 
@@ -105,20 +103,14 @@ const RegulationChatBox: React.FC<RegulationChatBoxProps> = ({ regulation }) => 
         setSummary(data.gpt_response.message);
       }
       // Update summary created time if available
-      if (data.gpt_response.timestamp) {
+      if (data.gpt_response?.timestamp) {
         setSummaryCreatedTime(data.gpt_response.timestamp);
       }
     }
-  }, [data, data?.gpt_response?.message, summary, data?.gpt_response.timestamp, regulation.id]);
+  }, [data, summary, regulation.id]);
 
   if (error) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-red-500">Error loading regulation chat history.</div>
-        </div>
-      </Layout>
-    );
+    return <p role="alert" className="mx-8 text-lg text-red-700">Error loading regulation chat history.</p>;
   }
 
   // Group messages by pairs and reverse the groups

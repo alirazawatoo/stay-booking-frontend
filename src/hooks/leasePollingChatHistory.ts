@@ -1,22 +1,14 @@
 import { useGetChatHistoryQuery } from '@/services/api';
-import { useEffect } from 'react';
+
+const POLL_INTERVAL_MS = 3000;
 
 const usePollingChatHistory = (documentId: string | undefined, shouldPoll: boolean) => {
   const { data, error, refetch } = useGetChatHistoryQuery(documentId, {
     skip: !documentId,
+    pollingInterval: shouldPoll ? POLL_INTERVAL_MS : 0,
   });
 
-  useEffect(() => {
-    if (!documentId) return;
-
-    const interval = setInterval(() => {
-      if (shouldPoll) refetch();
-    }, 3000); // Poll every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [documentId, refetch, shouldPoll]);
-
-  return { data, error };
+  return { data, error, refetch };
 };
 
 export default usePollingChatHistory;

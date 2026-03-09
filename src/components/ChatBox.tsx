@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useChatWithGptMutation, useGetChatHistoryQuery } from '../services/api';
+import { useChatWithGptMutation } from '../services/api';
 import dayjs from 'dayjs';
 import { Lease } from '@/types/leaseTypes';
 import ReactMarkdown from 'react-markdown';
-import Layout from './Layout';
 import usePollingChatHistory from '@/hooks/leasePollingChatHistory';
+import { parseServerTimestamp } from '@/utils/dates';
 import { toggleRefreshDocuments } from '@/store/slices/authSlice';
 import { useDispatch} from 'react-redux';
+
+const ANALYSIS_POLL_WINDOW_MS = 20 * 60 * 1000;
 
 interface Message {
   text: string;
@@ -29,9 +31,8 @@ const ChatBox: React.FC<ChatBoxProps> = ({ documentId, lease }) => {
 
   const dispatch = useDispatch();
 
-  const { data, error } = usePollingChatHistory(documentId, shouldPoll);
+  const { data, error, refetch } = usePollingChatHistory(documentId, shouldPoll);
   const [chatWithGpt, { isLoading: isSendingMessage }] = useChatWithGptMutation();
-  const {refetch } = useGetChatHistoryQuery(documentId, { skip: !documentId });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -70,7 +71,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ documentId, lease }) => {
           setSummary(response.summary);
         }
         // Store summary created time if available
-        if (data.gpt_response.timestamp) {
+        if (data?.gpt_response?.timestamp) {
           setSummaryCreatedTime(data.gpt_response.timestamp);
         }
       } catch (err) {
@@ -96,22 +97,21 @@ const ChatBox: React.FC<ChatBoxProps> = ({ documentId, lease }) => {
       }));
   };
 
+  // The initial analysis runs in a background task. Poll until it reports a
+  // result, but give up 20 minutes after upload so a lost task cannot poll forever.
   useEffect(() => {
-    // stop polling if doucment is uploaded is more than 20 minutes old, or status is no more pending
-    const old_time = new Date(data?.documnet_uploaded_at).getTime();
-    const time_difference = (new Date().getTime() - old_time) / 1000;
-    const status = data?.gpt_response?.status;
-    if (time_difference > 20 || (status && status !== "Pending")) {
+    if (!shouldPoll || !data) return;
+    const uploadedAt = parseServerTimestamp(data.document_uploaded_at);
+    const pollingExpired = uploadedAt !== null && Date.now() - uploadedAt > ANALYSIS_POLL_WINDOW_MS;
+    const status = data.gpt_response?.status;
+    if (pollingExpired || (status && status !== 'Pending')) {
       setShouldPoll(false);
       dispatch(toggleRefreshDocuments());
     }
-  },
-  [shouldPoll, data]);
-
+  }, [shouldPoll, data, dispatch]);
 
   // Fetch chat history on load or when data changes
   useEffect(() => {
-    refetch();
     if (data?.chat_history && Array.isArray(data.chat_history)) {
       setMessages(mapChatHistory(data.chat_history));
 
@@ -120,20 +120,14 @@ const ChatBox: React.FC<ChatBoxProps> = ({ documentId, lease }) => {
         setSummary(data.gpt_response.message);
       }
       // Update summary created time if available
-      if (data.gpt_response.timestamp) {
+      if (data.gpt_response?.timestamp) {
         setSummaryCreatedTime(data.gpt_response.timestamp);
       }
     }
   }, [data, documentId, lease]);
 
   if (error) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-red-500">Error loading chat history.</div>
-        </div>
-      </Layout>
-    );
+    return <p role="alert" className="mx-8 text-lg text-red-700">Error loading chat history.</p>;
   }
 
   // Group messages by pairs and reverse the groups
