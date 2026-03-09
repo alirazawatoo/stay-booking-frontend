@@ -10,9 +10,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
+    // eslint-plugin-react-refresh 0.3 has no allowConstantExport option and
+    // rejected the whole config with it.
+    'react-refresh/only-export-components': 'warn',
   },
 }
