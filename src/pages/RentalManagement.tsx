@@ -8,8 +8,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { setLoading, toggleRefreshRentals, setPolling, setTask } from '../store/slices/authSlice'; // Import actions
 import { toast } from 'react-toastify';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import download from '@/assets/images/download.png';
 import upload from '@/assets/images/upload.png';
+
+interface TaskResultPayload {
+  success: boolean;
+  message: string;
+}
 
 const RentalManagement = () => {
   const [page, setPage] = useState(1);
@@ -71,39 +77,35 @@ const RentalManagement = () => {
   }, [refreshRentals, refetch, rowsPerPage]);
 
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | undefined;
+    if (!polling || !taskId) return;
 
-    if (polling && taskId) {
-      interval = setInterval(async () => {
-        const result = await refetchTaskResult();
-        if (result.data?.success && result.data.message === "Task completed") {
-          // Task completed, stop polling
-          dispatch(setPolling(false));
-          dispatch(setTask(null));
-          toast.success('Task completed successfully!');
-          dispatch(toggleRefreshRentals()); // Trigger rentals refresh
-          refetchCsvData(); // Update CSV data
-          dispatch(setLoading(false)); // Stop loading
-          if (interval !== undefined) clearInterval(interval); // Clear the interval
-        } else if (!result.data?.success && result.data?.message === "Task failed") {
-          // Task failed, stop polling
-          dispatch(setPolling(false));
-          dispatch(setTask(null));
-          toast.error('Task processing failed.');
-          dispatch(toggleRefreshRentals());
-          refetchCsvData();
-          dispatch(setLoading(false)); // Stop loading
-          if (interval !== undefined) clearInterval(interval); // Clear the interval
-        }
-      }, 5000);
-    }
-
-    // Cleanup function to clear the interval if polling stops
-    return () => {
-      if (interval !== undefined) clearInterval(interval);
+    const finishTask = (succeeded: boolean) => {
+      dispatch(setPolling(false));
+      dispatch(setTask(null));
+      if (succeeded) toast.success('Task completed successfully!');
+      else toast.error('Task processing failed.');
+      dispatch(toggleRefreshRentals());
+      refetchCsvData();
+      dispatch(setLoading(false));
     };
-  }, [polling, taskId, refetchTaskResult, dispatch, refetchCsvData]);
 
+    const interval = setInterval(async () => {
+      const result = await refetchTaskResult();
+      // A failed Celery task comes back as HTTP 500, so its body is on `error`, not `data`.
+      const payload = (result.data ?? (result.error as FetchBaseQueryError | undefined)?.data) as
+        | TaskResultPayload
+        | undefined;
+      if (payload?.message === 'Task completed') {
+        clearInterval(interval);
+        finishTask(true);
+      } else if (payload?.message === 'Task failed') {
+        clearInterval(interval);
+        finishTask(false);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [polling, taskId, refetchTaskResult, dispatch, refetchCsvData]);
 
   const handleUploadRental = async (file: FormData) => {
     try {
