@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -13,7 +14,6 @@ import { toggleRefreshDocuments } from '../store/slices/authSlice';
 import { formatAddress } from '@/utils/format';
 import type { RootState } from '@/store';
 import type { Lease } from '@/types/leaseTypes';
-import UploadIcon from '@/assets/images/UploadIcon.png';
 
 const ViewNotes = () => {
   const { id, documentId } = useParams<{ id: string; documentId: string }>();
@@ -70,7 +70,7 @@ const ViewNotes = () => {
       <div className="mx-auto w-full flex-1 bg-white p-4">
         <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
           <div className="flex flex-col items-center md:items-start lg:pl-7">
-            <h1 className="text-xl font-bold">Document Detail</h1>
+            <h1 className="text-2xl font-semibold text-pine-900">Document Detail</h1>
             <Breadcrumbs
               items={[
                 { label: 'Your Leases', to: '/leases' },
@@ -82,9 +82,9 @@ const ViewNotes = () => {
           <button
             type="button"
             onClick={() => setUploadModalOpen(true)}
-            className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600 lg:mr-7"
+            className="flex items-center space-x-2 rounded bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 lg:mr-7"
           >
-            <img src={UploadIcon} alt="" className="h-5 w-5" />
+            <ArrowUpTrayIcon className="h-5 w-5" aria-hidden="true" />
             <span>Upload Revision</span>
           </button>
         </div>

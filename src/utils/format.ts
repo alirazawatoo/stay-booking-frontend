@@ -1,6 +1,7 @@
 export function formatCurrency(value: number | null | undefined): string {
   if (value === null || value === undefined) return 'N/A';
-  return `$${value.toLocaleString('en-US')}`;
+  const amount = `$${Math.abs(value).toLocaleString('en-US')}`;
+  return value < 0 ? `-${amount}` : amount;
 }
 
 export function formatCount(value: number | null | undefined): string {

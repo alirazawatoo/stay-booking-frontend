@@ -9,7 +9,7 @@ interface PageMessageProps {
 const PageMessage: React.FC<PageMessageProps> = ({ kind, children }) => (
   <p
     role={kind === 'error' ? 'alert' : 'status'}
-    className={`p-8 text-center text-lg ${kind === 'error' ? 'text-red-700' : 'text-gray-600'}`}
+    className={`p-8 text-center text-lg ${kind === 'error' ? 'text-red-700' : 'text-stone-600'}`}
   >
     {children}
   </p>

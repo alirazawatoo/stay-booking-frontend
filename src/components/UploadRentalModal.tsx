@@ -65,8 +65,8 @@ const UploadRentalModal: React.FC<UploadRentalModalProps> = ({ isOpen, onClose, 
       />
 
       {loading && (
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-gray-200" role="progressbar" aria-label="Uploading">
-          <div className="h-full w-full animate-pulse bg-red-500" />
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-stone-200" role="progressbar" aria-label="Uploading">
+          <div className="h-full w-full animate-pulse bg-pine-700" />
         </div>
       )}
 
@@ -74,12 +74,12 @@ const UploadRentalModal: React.FC<UploadRentalModalProps> = ({ isOpen, onClose, 
         <button
           type="button"
           onClick={handleUpload}
-          className="rounded-lg bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+          className="rounded-lg bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 disabled:opacity-60"
           disabled={loading}
         >
           Upload
         </button>
-        <button type="button" onClick={onClose} className="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
+        <button type="button" onClick={onClose} className="rounded-lg bg-stone-500 px-4 py-2 text-white hover:bg-stone-600">
           Cancel
         </button>
       </div>

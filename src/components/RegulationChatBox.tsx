@@ -19,7 +19,7 @@ const RegulationChatBox: React.FC<{ regulation: Regulation }> = ({ regulation })
     <div className="text-left">
       <div className="mb-6 w-full px-12">
         <div className="mb-4 mt-10 md:mb-10">
-          <h1 className="text-center text-xl font-bold md:text-2xl lg:text-left">Regulation Details</h1>
+          <h1 className="text-center text-2xl font-semibold text-pine-900 lg:text-left">Regulation Details</h1>
           <div className="text-center text-xs md:text-base lg:text-left">
             <Breadcrumbs items={[{ label: 'Your Regulation Searches', to: '/regulations' }, { label: regulation.search }]} />
           </div>

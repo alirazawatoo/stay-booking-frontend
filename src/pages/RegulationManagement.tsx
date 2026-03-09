@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import RegulationTable from '../components/RegulationTable';
@@ -10,7 +11,6 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { useGetRegulationsQuery, useSearchRegulationsQuery } from '../services/api';
 import type { RootState } from '@/store';
 import type { Regulation } from '@/types/regulationTypes';
-import SearchIcon from '@/assets/images/SearchIcon.png';
 
 const NO_FILTERS: RegulationSearchFilters = { query: '', status: '' };
 
@@ -43,11 +43,11 @@ const RegulationManagement = () => {
       <div className="mx-auto w-full flex-1 bg-white p-4">
         <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
           <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-xl font-bold">Your Regulation Searches</h1>
+            <h1 className="text-2xl font-semibold text-pine-900">Your Regulation Searches</h1>
             <Breadcrumbs items={[{ label: 'Your Regulation Searches' }]} />
           </div>
-          <Link to="/regulation/new" className="flex items-center space-x-2 rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
-            <img src={SearchIcon} alt="" className="h-5 w-5" />
+          <Link to="/regulation/new" className="flex items-center space-x-2 rounded bg-pine-700 px-4 py-2 text-white hover:bg-pine-800">
+            <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
             <span>New Search</span>
           </Link>
         </div>

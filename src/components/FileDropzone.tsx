@@ -14,11 +14,11 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({ dropzone, inputId, fileCoun
     <div
       {...getRootProps()}
       className={`mt-4 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center ${
-        isDragActive ? 'border-red-500 bg-red-50' : 'border-gray-300 hover:border-red-400'
+        isDragActive ? 'border-pine-600 bg-pine-50' : 'border-stone-300 hover:border-pine-600'
       }`}
     >
       <input {...getInputProps()} id={inputId} aria-label="Choose files" />
-      <svg className="mx-auto mb-4 h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <svg className="mx-auto mb-4 h-12 w-12 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -26,10 +26,10 @@ const FileDropzone: React.FC<FileDropzoneProps> = ({ dropzone, inputId, fileCoun
           d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
         />
       </svg>
-      <p className="text-gray-600">
+      <p className="text-stone-600">
         {isDragActive ? 'Drop files here' : fileCount > 0 ? `${fileCount} file(s) selected` : 'Drop or select files here'}
       </p>
-      <p className="mt-2 text-xs text-gray-500">{hint}</p>
+      <p className="mt-2 text-xs text-stone-500">{hint}</p>
     </div>
   );
 };

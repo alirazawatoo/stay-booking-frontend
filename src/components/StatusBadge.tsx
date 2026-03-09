@@ -18,7 +18,7 @@ const TONE_CLASSES: Record<Tone, string> = {
   positive: 'bg-green-100 text-green-900',
   caution: 'bg-yellow-100 text-yellow-900',
   negative: 'bg-red-100 text-red-900',
-  neutral: 'bg-gray-200 text-gray-800',
+  neutral: 'bg-stone-200 text-stone-800',
 };
 
 const StatusBadge: React.FC<{ status?: string | null; fallback?: string }> = ({ status, fallback = 'Unknown' }) => {

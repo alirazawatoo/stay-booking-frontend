@@ -16,7 +16,7 @@ const RentalDetailsModal: React.FC<{ rental: RentalProperty; onClose: () => void
     {
       label: 'Link',
       value: (
-        <a href={rental.property_zillow_link} className="text-red-700 hover:underline" target="_blank" rel="noopener noreferrer">
+        <a href={rental.property_zillow_link} className="text-pine-700 hover:underline" target="_blank" rel="noopener noreferrer">
           View Property
         </a>
       ),
@@ -35,8 +35,8 @@ const RentalDetailsModal: React.FC<{ rental: RentalProperty; onClose: () => void
       <dl className="space-y-3">
         {details.map((item) => (
           <div key={item.label} className="flex items-center justify-between gap-4">
-            <dt className="font-medium text-gray-700">{item.label}</dt>
-            <dd className="text-right text-gray-900">{item.value}</dd>
+            <dt className="font-medium text-stone-700">{item.label}</dt>
+            <dd className="text-right text-stone-900">{item.value}</dd>
           </div>
         ))}
       </dl>

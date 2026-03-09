@@ -14,7 +14,7 @@ const formatFilterDate = (date: Date): string =>
 
 const toNumber = (value: string): number | undefined => (value === '' ? undefined : Number(value));
 
-const FIELD = 'w-full rounded-lg border bg-gray-50 p-2';
+const FIELD = 'w-full rounded-lg border bg-stone-50 p-2';
 
 const RentalSearchBar: React.FC<RentalSearchBarProps> = ({ onSearch, batchIds }) => {
   const [minProfit, setMinProfit] = useState('');
@@ -45,7 +45,7 @@ const RentalSearchBar: React.FC<RentalSearchBarProps> = ({ onSearch, batchIds })
   };
 
   return (
-    <form role="search" onSubmit={handleSearch} className="rounded-lg bg-gray-100 p-4">
+    <form role="search" onSubmit={handleSearch} className="rounded-lg bg-stone-100 p-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
         <label>
           <span className="sr-only">Minimum monthly profit</span>
@@ -83,7 +83,7 @@ const RentalSearchBar: React.FC<RentalSearchBarProps> = ({ onSearch, batchIds })
             setEndDate(end);
           }}
         />
-        <button type="submit" className="rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700">
+        <button type="submit" className="rounded-lg bg-stone-600 px-4 py-2 text-white transition-colors hover:bg-stone-700">
           Search
         </button>
       </div>

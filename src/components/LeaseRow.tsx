@@ -18,7 +18,7 @@ const LeaseRow: React.FC<LeaseRowProps> = ({ lease, index, onEditClick }) => {
   const address = formatAddress(lease.address1, lease.address2);
 
   return (
-    <tr onClick={() => navigate(`/lease/${lease.id}`)} className="cursor-pointer hover:bg-gray-50">
+    <tr onClick={() => navigate(`/lease/${lease.id}`)} className="cursor-pointer hover:bg-stone-50">
       <td className={CELL}>{index}</td>
       <td className={CELL}>{lease.date}</td>
       <td className={CELL}>
@@ -41,7 +41,7 @@ const LeaseRow: React.FC<LeaseRowProps> = ({ lease, index, onEditClick }) => {
             onEditClick(lease);
           }}
           aria-label={`Edit lease at ${address}`}
-          className="text-gray-700 hover:text-black"
+          className="text-stone-700 hover:text-black"
         >
           <PencilIcon className="h-5 w-5" aria-hidden="true" />
         </button>

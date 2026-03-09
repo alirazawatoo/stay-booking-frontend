@@ -43,12 +43,12 @@ const NewRegulationSearch: React.FC = () => {
     <Layout>
       <div className="mx-auto w-full flex-1 bg-white p-4">
         <div className="mb-4 mt-7 flex flex-col items-center md:items-start">
-          <h1 className="text-xl font-bold">New Regulation Search</h1>
+          <h1 className="text-2xl font-semibold text-pine-900">New Regulation Search</h1>
           <Breadcrumbs items={[{ label: 'Your Regulation Searches', to: '/regulations' }, { label: 'New Search' }]} />
         </div>
 
         <form onSubmit={handleSubmit} className="my-10 text-left" noValidate>
-          <label htmlFor="regulation-search" className="mb-2 block text-sm font-medium text-gray-700 md:text-base">
+          <label htmlFor="regulation-search" className="mb-2 block text-sm font-medium text-stone-700 md:text-base">
             Enter a city, address or area
           </label>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -59,9 +59,9 @@ const NewRegulationSearch: React.FC = () => {
               onChange={(event) => setInputValue(event.target.value)}
               placeholder="Message RegAdvisor AI"
               aria-describedby={error ? 'regulation-search-error' : undefined}
-              className="w-full rounded border border-gray-300 p-2 sm:w-3/4 md:w-1/2"
+              className="w-full rounded border border-stone-300 p-2 sm:w-3/4 md:w-1/2"
             />
-            <button type="submit" className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600">
+            <button type="submit" className="rounded bg-pine-700 px-4 py-2 text-white hover:bg-pine-800">
               Submit
             </button>
           </div>

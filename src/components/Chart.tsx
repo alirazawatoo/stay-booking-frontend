@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#000000'];
+const COLORS = ['#1c4f3b', '#b8862b', '#7cb59a', '#7a5716', '#a8a29e'];
 
 const Chart: React.FC<{ data: { user_type: string }[] }> = ({ data }) => {
   const countsByType = data.reduce<Record<string, number>>((counts, user) => {

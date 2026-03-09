@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import type { ChatHistoryEntry, ChatMessage } from '@/types/chatTypes';
 
-export const formatChatTimestamp = (timestamp: string): string => dayjs(timestamp).format('DD/MM/YYYY hh:mm A');
+export const formatChatTimestamp = (timestamp: string): string => dayjs(timestamp).format('D MMM YYYY, h:mm A');
 
 export const toChatMessages = (history: ChatHistoryEntry[]): ChatMessage[] =>
   history

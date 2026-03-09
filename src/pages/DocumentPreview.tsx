@@ -16,7 +16,7 @@ const DocumentPreview: React.FC = () => {
   );
 
   if (isLoading) {
-    return <p role="status" className="p-8 text-slate-600">Loading document…</p>;
+    return <p role="status" className="p-8 text-stone-600">Loading document…</p>;
   }
 
   if (isError || !data?.file_url) {

@@ -1,20 +1,21 @@
-// UpdatePassword.tsx
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useUpdatePasswordMutation } from '../services/api';
 import { toast } from 'react-toastify';
+import { useUpdatePasswordMutation } from '../services/api';
+import Wordmark from '../components/Wordmark';
+
+const INPUT = 'mt-2 w-full rounded-lg border border-stone-300 bg-white px-4 py-3 font-normal';
 
 const UpdatePassword: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
-  const [updatePassword] = useUpdatePasswordMutation();
-
   const [error, setError] = useState('');
+  const [updatePassword, { isLoading }] = useUpdatePasswordMutation();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (password !== confirmation) {
       setError('The two passwords do not match.');
       return;
@@ -30,44 +31,27 @@ const UpdatePassword: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Update your password
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="password" className="sr-only">
-                New Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="New Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          <div><label htmlFor="confirm-password">Confirm new password</label><input id="confirm-password" type="password" autoComplete="new-password" required value={confirmation} onChange={event => setConfirmation(event.target.value)} className="w-full px-3 py-2 border rounded" /></div>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-6 py-12">
+      <div className="w-full max-w-md rounded-xl border border-stone-200 bg-white p-8 shadow-sm">
+        <Wordmark tone="dark" />
+        <h1 className="mt-8 text-3xl font-semibold text-stone-900">Update your password</h1>
+        <p className="mt-2 text-stone-600">Your account was created with a temporary password. Choose your own before continuing.</p>
+        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          <label htmlFor="new-password" className="block text-sm font-medium">
+            New password
+            <input id="new-password" type="password" autoComplete="new-password" required value={password} onChange={(event) => setPassword(event.target.value)} className={INPUT} />
+          </label>
+          <label htmlFor="confirm-password" className="block text-sm font-medium">
+            Confirm new password
+            <input id="confirm-password" type="password" autoComplete="new-password" required value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className={INPUT} />
+          </label>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Update Password
-            </button>
-          </div>
+          <button type="submit" disabled={isLoading} className="w-full rounded-lg bg-pine-700 py-3 font-medium text-white hover:bg-pine-800 disabled:opacity-60">
+            Update Password
+          </button>
         </form>
       </div>
-    </div>
+    </main>
   );
 };
 

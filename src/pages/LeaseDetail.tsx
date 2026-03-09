@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -18,7 +19,6 @@ import { formatLocalDate, parseServerTimestamp } from '@/utils/dates';
 import { formatAddress } from '@/utils/format';
 import type { RootState } from '@/store';
 import type { Document, Lease } from '@/types/leaseTypes';
-import UploadIcon from '@/assets/images/UploadIcon.png';
 
 const HEADERS = ['#', 'Date', 'Document Name', 'Status', 'View Document', 'View Notes'];
 const CELL = 'whitespace-nowrap px-4 py-3 text-sm md:px-6 md:text-base';
@@ -87,15 +87,15 @@ const LeaseDetail = () => {
       <div className="mx-auto w-full flex-1 bg-white p-4">
         <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
           <div className="flex flex-col items-center md:items-start">
-            <h1 className="text-xl font-bold">Lease Detail</h1>
+            <h1 className="text-2xl font-semibold text-pine-900">Lease Detail</h1>
             <Breadcrumbs items={[{ label: 'Your Leases', to: '/leases' }, { label: 'Lease Detail' }]} />
           </div>
           <button
             type="button"
             onClick={() => setUploadModalOpen(true)}
-            className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600"
+            className="flex items-center space-x-2 rounded bg-pine-700 px-4 py-3 text-white hover:bg-pine-800"
           >
-            <img src={UploadIcon} alt="" className="h-5 w-5" />
+            <ArrowUpTrayIcon className="h-5 w-5" aria-hidden="true" />
             <span>Upload Revision</span>
           </button>
         </div>
@@ -106,11 +106,11 @@ const LeaseDetail = () => {
           <PageMessage kind="loading">Loading documents…</PageMessage>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="mt-4 w-full table-auto divide-y divide-gray-200">
-              <thead className="bg-gray-200">
+            <table className="mt-4 w-full table-auto divide-y divide-stone-200">
+              <thead className="bg-stone-200">
                 <tr>
                   {HEADERS.map((header) => (
-                    <th key={header} scope="col" className="px-4 py-3 text-center text-sm font-bold uppercase text-gray-700 md:px-6">
+                    <th key={header} scope="col" className="px-4 py-3 text-center text-sm font-bold uppercase text-stone-700 md:px-6">
                       {header}
                     </th>
                   ))}
@@ -119,13 +119,13 @@ const LeaseDetail = () => {
               <tbody>
                 {documentList.length === 0 ? (
                   <tr>
-                    <td colSpan={HEADERS.length} className="px-4 py-4 text-center text-gray-500">
+                    <td colSpan={HEADERS.length} className="px-4 py-4 text-center text-stone-500">
                       No documents uploaded for this lease yet.
                     </td>
                   </tr>
                 ) : (
                   documentList.map((doc, index) => (
-                    <tr key={doc.id} className="border-b border-gray-200 hover:bg-gray-50">
+                    <tr key={doc.id} className="border-b border-stone-200 hover:bg-stone-50">
                       <td className={CELL}>{index + 1}</td>
                       <td className={CELL}>{formatUploadDate(doc.uploaded_at)}</td>
                       <td className={`${CELL} truncate`} title={doc.name}>
@@ -135,12 +135,12 @@ const LeaseDetail = () => {
                         <StatusBadge status={doc.status} />
                       </td>
                       <td className={CELL}>
-                        <Link to={`/preview/${doc.id}`} className="text-red-700 hover:underline">
+                        <Link to={`/preview/${doc.id}`} className="text-pine-700 hover:underline">
                           View Document
                         </Link>
                       </td>
                       <td className={CELL}>
-                        <Link to={`/lease/${lease.id}/documents/${doc.id}/notes`} className="text-red-700 hover:underline">
+                        <Link to={`/lease/${lease.id}/documents/${doc.id}/notes`} className="text-pine-700 hover:underline">
                           View Notes
                         </Link>
                       </td>

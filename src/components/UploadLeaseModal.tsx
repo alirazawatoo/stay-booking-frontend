@@ -99,13 +99,13 @@ const UploadLeaseModal: React.FC<UploadLeaseModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={isEditMode ? 'Edit Lease Record' : 'Create New Lease Record'}>
       <div className="flex flex-col space-y-3">
         {ADDRESS_FIELDS.map(({ key, label }) => (
-          <label key={key} className="flex flex-col text-sm font-medium text-gray-700">
+          <label key={key} className="flex flex-col text-sm font-medium text-stone-700">
             {label}
             <input
               type="text"
               value={address[key]}
               onChange={(event) => setAddress((previous) => ({ ...previous, [key]: event.target.value }))}
-              className="mt-1 rounded-lg border border-gray-300 p-2 font-normal focus:outline-none focus:ring-2 focus:ring-red-300"
+              className="mt-1 rounded-lg border border-stone-300 p-2 font-normal focus:outline-none focus:ring-2 focus:ring-pine-300"
             />
           </label>
         ))}
@@ -117,12 +117,12 @@ const UploadLeaseModal: React.FC<UploadLeaseModalProps> = ({
         <button
           type="button"
           onClick={handleSubmit}
-          className="rounded-lg bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+          className="rounded-lg bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 disabled:opacity-60"
           disabled={isUploading}
         >
           {isUploading ? 'Saving…' : isEditMode ? 'Save Changes' : 'Analyze Lease'}
         </button>
-        <button type="button" onClick={onClose} className="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
+        <button type="button" onClick={onClose} className="rounded-lg bg-stone-500 px-4 py-2 text-white hover:bg-stone-600">
           Cancel
         </button>
       </div>

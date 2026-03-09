@@ -48,8 +48,8 @@ const RentalTable: React.FC<{ rentals: RentalProperty[] }> = ({ rentals }) => {
 
   return (
     <div className="mt-6 w-full overflow-x-auto">
-      <table className="w-full table-auto divide-y divide-gray-200">
-        <thead className="bg-gray-200">
+      <table className="w-full table-auto divide-y divide-stone-200">
+        <thead className="bg-stone-200">
           <tr>
             {HEADERS.map((header) => {
               const active = sortKey === header.key && sortOrder;
@@ -58,7 +58,7 @@ const RentalTable: React.FC<{ rentals: RentalProperty[] }> = ({ rentals }) => {
                   key={header.key}
                   scope="col"
                   aria-sort={active ? (sortOrder === 'asc' ? 'ascending' : 'descending') : undefined}
-                  className="px-4 py-3 text-center text-xs font-bold uppercase text-gray-700 md:px-6"
+                  className="px-4 py-3 text-center text-xs font-bold uppercase text-stone-700 md:px-6"
                 >
                   <button type="button" onClick={() => handleSort(header.key)} className="uppercase">
                     {header.label}
@@ -69,14 +69,14 @@ const RentalTable: React.FC<{ rentals: RentalProperty[] }> = ({ rentals }) => {
             })}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200 bg-white">
+        <tbody className="divide-y divide-stone-200 bg-white">
           {sortedRentals.length > 0 ? (
             sortedRentals.map((rental, index) => (
               <RentalRow key={`${rental.batch_id}-${rental.property_zillow_link}-${index}`} rental={rental} onSelect={() => setSelectedRental(rental)} />
             ))
           ) : (
             <tr>
-              <td colSpan={HEADERS.length} className="px-4 py-4 text-center text-gray-500">
+              <td colSpan={HEADERS.length} className="px-4 py-4 text-center text-stone-500">
                 No rental properties match. Upload a spreadsheet or clear the filters.
               </td>
             </tr>

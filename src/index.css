@@ -2,6 +2,24 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-body {
-  font-family: 'Inter', sans-serif;
+@layer base {
+  body {
+    @apply bg-stone-50 font-sans text-stone-900 antialiased;
+  }
+
+  h1,
+  h2 {
+    @apply font-display tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-brass-500;
+  }
+}
+
+/* react-datepicker wraps its input in an inline-block and its stylesheet loads
+   later with the page chunk, so this needs the extra specificity to win. */
+label .react-datepicker-wrapper {
+  display: block;
+  width: 100%;
 }

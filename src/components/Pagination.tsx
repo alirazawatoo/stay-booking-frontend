@@ -14,7 +14,7 @@ const Pagination: React.FC<PaginationProps> = ({ page, hasNext, onPageChange, di
       type="button"
       onClick={() => onPageChange(page - 1)}
       disabled={disabled || page <= 1}
-      className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+      className="rounded bg-pine-700 px-4 py-2 text-white hover:bg-pine-800 disabled:opacity-50"
     >
       Previous
     </button>
@@ -23,7 +23,7 @@ const Pagination: React.FC<PaginationProps> = ({ page, hasNext, onPageChange, di
       type="button"
       onClick={() => onPageChange(page + 1)}
       disabled={disabled || !hasNext}
-      className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+      className="rounded bg-pine-700 px-4 py-2 text-white hover:bg-pine-800 disabled:opacity-50"
     >
       Next
     </button>

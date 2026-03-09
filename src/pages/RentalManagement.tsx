@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ArrowDownTrayIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
@@ -19,8 +20,6 @@ import {
 import { setLoading, toggleRefreshRentals, setPolling, setTask } from '../store/slices/authSlice';
 import type { RootState } from '@/store';
 import type { FilteredRentalsResponse } from '@/types/rentalTypes';
-import download from '@/assets/images/download.png';
-import upload from '@/assets/images/upload.png';
 
 interface TaskResultPayload {
   success: boolean;
@@ -142,41 +141,41 @@ const RentalManagement = () => {
   return (
     <Layout>
       {polling && taskId && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-gray-500 bg-opacity-50" role="status">
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-stone-500 bg-opacity-50" role="status">
           <p className="text-lg font-bold text-white">Processing… {progressPercentage}%</p>
           <div
-            className="h-4 w-1/3 rounded-full bg-gray-200"
+            className="h-4 w-1/3 rounded-full bg-stone-200"
             role="progressbar"
             aria-valuenow={progressPercentage}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Import progress"
           >
-            <div className="h-4 rounded-full bg-red-500" style={{ width: `${progressPercentage}%` }} />
+            <div className="h-4 rounded-full bg-pine-700" style={{ width: `${progressPercentage}%` }} />
           </div>
         </div>
       )}
 
       <div className="relative mx-auto w-full flex-1 bg-white p-4">
         <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
-          <h1 className="text-xl font-bold">Your Rental Properties</h1>
+          <h1 className="text-2xl font-semibold text-pine-900">Your Rental Properties</h1>
           <div className="flex flex-row items-center justify-end space-x-2">
             <button
               type="button"
               onClick={handleDownloadCsv}
-              className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+              className="flex items-center space-x-2 rounded bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 disabled:opacity-60"
               disabled={isBusy || isDownloading}
             >
-              <img src={download} alt="" className="h-5 w-5" />
+              <ArrowDownTrayIcon className="h-5 w-5" aria-hidden="true" />
               <span>{isDownloading ? 'Preparing CSV…' : 'Download CSV'}</span>
             </button>
             <button
               type="button"
               onClick={() => setUploadModalOpen(true)}
-              className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+              className="flex items-center space-x-2 rounded bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 disabled:opacity-60"
               disabled={isBusy}
             >
-              <img src={upload} alt="" className="h-5 w-5" />
+              <ArrowUpTrayIcon className="h-5 w-5" aria-hidden="true" />
               <span>Upload Properties</span>
             </button>
           </div>
@@ -198,7 +197,7 @@ const RentalManagement = () => {
               <select
                 value={rowsPerPage}
                 onChange={handleRowsPerPageChange}
-                className="rounded border border-red-600 px-2 py-1 focus:border-red-600 focus:outline-none"
+                className="rounded border border-pine-600 px-2 py-1 focus:border-pine-600 focus:outline-none"
               >
                 {ROWS_PER_PAGE_OPTIONS.map((option) => (
                   <option key={option} value={option}>

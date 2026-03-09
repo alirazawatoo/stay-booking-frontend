@@ -53,8 +53,8 @@ const AdminDashboard: React.FC = () => {
   return (
     <div className="mx-auto w-full flex-1 bg-white p-4">
       <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-        <button type="button" className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600" onClick={() => setEditing(null)}>
+        <h1 className="text-2xl font-semibold text-pine-900">Dashboard</h1>
+        <button type="button" className="rounded bg-pine-700 px-4 py-2 text-white hover:bg-pine-800" onClick={() => setEditing(null)}>
           Create New User
         </button>
       </div>

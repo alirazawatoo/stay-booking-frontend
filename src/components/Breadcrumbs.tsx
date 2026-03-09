@@ -10,7 +10,7 @@ export interface Crumb {
 const Breadcrumbs: React.FC<{ items: Crumb[] }> = ({ items }) => {
   const trail: Crumb[] = [{ label: 'Home', to: '/dashboard' }, ...items];
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-gray-500">
+    <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
       <ol className="flex flex-wrap">
         {trail.map((crumb, index) => {
           const isLast = index === trail.length - 1;

@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 import { useGetUserProfileQuery } from '../services/api';
 import Modal from './Modal';
 import ChangePasswordForm from './ChangePasswordForm';
 import HeaderDropdown from './HeaderDropdown';
-import bnbLogo from '@/assets/images/bnb_logo.png';
+import Wordmark from './Wordmark';
 
-const Header: React.FC = () => {
+const Header: React.FC<{ onToggleNavigation: () => void; navigationOpen: boolean }> = ({ onToggleNavigation, navigationOpen }) => {
   const { data: user } = useGetUserProfileQuery(undefined);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,15 +26,29 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-red-500 p-2 shadow-lg">
-      <img src={bnbLogo} alt="bnb University Logo" className="h-14" />
+    <header className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center justify-between border-b border-pine-950 bg-pine-800 px-3 sm:px-5">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onToggleNavigation}
+          aria-label={navigationOpen ? 'Close navigation' : 'Open navigation'}
+          aria-expanded={navigationOpen}
+          aria-controls="sidebar"
+          className="rounded p-2 text-pine-100 hover:bg-pine-700"
+        >
+          <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+        </button>
+        <Link to="/dashboard" aria-label="Property Stay dashboard">
+          <Wordmark />
+        </Link>
+      </div>
       <div className="relative" ref={dropdownRef}>
         <button
           type="button"
           aria-haspopup="menu"
           aria-expanded={dropdownOpen}
           aria-label="Account menu"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700 transition duration-300 hover:bg-gray-400"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-brass-300 font-semibold text-pine-950 transition hover:bg-brass-100"
           onClick={() => setDropdownOpen((open) => !open)}
         >
           {userInitial}

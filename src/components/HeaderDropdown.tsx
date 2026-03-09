@@ -10,7 +10,7 @@ interface HeaderDropdownProps {
   onChangePassword: () => void;
 }
 
-const ITEM = 'block w-full rounded-md bg-white px-4 py-2 text-left text-gray-700 transition duration-200 hover:bg-gray-200 hover:text-black';
+const ITEM = 'block w-full rounded-md bg-white px-4 py-2 text-left text-stone-700 transition duration-200 hover:bg-stone-200 hover:text-black';
 
 const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ isOpen, onClose, onChangePassword }) => {
   const [logout] = useLogoutMutation();

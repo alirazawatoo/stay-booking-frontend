@@ -19,7 +19,7 @@ const DateRangeInput: React.FC<DateRangeInputProps> = ({ startDate, endDate, onC
       endDate={endDate}
       onChange={([start, end]) => onChange(start, end)}
       placeholderText="Select date range"
-      className="w-full rounded-lg border bg-gray-50 p-2"
+      className="w-full rounded-lg border bg-stone-50 p-2"
       todayButton="Today"
       isClearable
     />

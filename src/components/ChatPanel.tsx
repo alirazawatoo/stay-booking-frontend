@@ -60,13 +60,13 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ assistantName, history, hasError,
           type="text"
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-red-300 sm:w-80 md:w-96 lg:w-1/2"
+          className="w-full rounded-lg border p-2 focus:outline-none focus:ring-2 focus:ring-pine-300 sm:w-80 md:w-96 lg:w-1/2"
           placeholder={`Type your message to send it to ${assistantName}...`}
         />
         <button
           type="submit"
           disabled={Boolean(pendingMessage) || !input.trim()}
-          className="rounded bg-red-500 p-2 text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="rounded bg-pine-700 p-2 text-white transition-colors hover:bg-pine-800 disabled:cursor-not-allowed disabled:bg-stone-300"
         >
           Send
         </button>
@@ -74,14 +74,14 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ assistantName, history, hasError,
       {sendError && <p role="alert" className="mb-4 pl-3 text-sm text-red-700">{sendError}</p>}
 
       <div className="chat-messages mb-6 overflow-y-auto p-4 pl-0" style={{ maxHeight: 'calc(100vh - 300px)' }} aria-live="polite">
-        {pendingMessage && <p className="text-center italic text-gray-500">{assistantName} is typing…</p>}
+        {pendingMessage && <p className="text-center italic text-stone-500">{assistantName} is typing…</p>}
         {exchanges.map((exchange, index) => (
           <div key={index}>
             {exchange.map((message, messageIndex) => (
               <div key={messageIndex} className="mb-2">
                 <div className="inline-block max-w-7xl rounded p-3 text-black">
                   <ReactMarkdown>{message.text}</ReactMarkdown>
-                  <div className="mt-1 text-xs text-gray-500">{message.timestamp}</div>
+                  <div className="mt-1 text-xs text-stone-500">{message.timestamp}</div>
                 </div>
               </div>
             ))}
@@ -91,7 +91,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ assistantName, history, hasError,
         {summary && (
           <section className="mb-2 p-4" aria-label="Initial analysis">
             <strong>Initial Analysis</strong>
-            {summaryTime && <div className="mb-7 text-xs text-gray-500">{formatChatTimestamp(summaryTime)}</div>}
+            {summaryTime && <div className="mb-7 text-xs text-stone-500">{formatChatTimestamp(summaryTime)}</div>}
             <div className="space-y-8">
               <ReactMarkdown>{summary}</ReactMarkdown>
             </div>

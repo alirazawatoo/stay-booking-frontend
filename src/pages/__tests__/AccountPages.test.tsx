@@ -26,7 +26,7 @@ describe('dashboard and account pages', () => {
 
   it('checks that the new passwords match before calling the API', async () => {
     renderApp('/update-password/2')
-    fireEvent.change(await screen.findByLabelText('New Password'), { target: { value: 'first-value' } })
+    fireEvent.change(await screen.findByLabelText('New password'), { target: { value: 'first-value' } })
     fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'second-value' } })
     fireEvent.click(screen.getByRole('button', { name: 'Update Password' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('do not match')

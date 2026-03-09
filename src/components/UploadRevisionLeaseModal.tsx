@@ -55,12 +55,12 @@ const UploadRevisionLeaseModal: React.FC<UploadRevisionLeaseModalProps> = ({ isO
         <button
           type="button"
           onClick={handleUpload}
-          className="rounded-lg bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+          className="rounded-lg bg-pine-700 px-4 py-3 text-white hover:bg-pine-800 disabled:opacity-60"
           disabled={isUploading}
         >
           {isUploading ? 'Uploading…' : 'Upload Revision'}
         </button>
-        <button type="button" onClick={onClose} className="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">
+        <button type="button" onClick={onClose} className="rounded-lg bg-stone-500 px-4 py-2 text-white hover:bg-stone-600">
           Cancel
         </button>
       </div>

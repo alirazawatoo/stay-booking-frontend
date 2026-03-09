@@ -43,7 +43,7 @@ const ChangePasswordForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </p>
       )}
       {FIELDS.map((field) => (
-        <label key={field.id} htmlFor={field.id} className="block text-sm font-medium text-gray-700">
+        <label key={field.id} htmlFor={field.id} className="block text-sm font-medium text-stone-700">
           {field.label}
           <input
             id={field.id}
@@ -60,11 +60,11 @@ const ChangePasswordForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 rounded-md bg-gray-600 px-8 py-2 text-white transition duration-200 hover:bg-gray-800 disabled:opacity-60"
+          className="flex-1 rounded-md bg-pine-700 px-8 py-2 text-white transition duration-200 hover:bg-pine-800 disabled:opacity-60"
         >
           Change Password
         </button>
-        <button type="button" onClick={onClose} className="rounded-md bg-red-500 px-3 py-1 text-white transition duration-200 hover:bg-red-700">
+        <button type="button" onClick={onClose} className="rounded-md bg-stone-200 px-3 py-1 text-stone-800 transition duration-200 hover:bg-stone-300">
           Cancel
         </button>
       </div>

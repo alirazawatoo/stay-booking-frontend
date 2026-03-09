@@ -5,6 +5,7 @@ describe('display formatters', () => {
   it('keeps zero values and marks missing ones', () => {
     expect(formatCurrency(0)).toBe('$0')
     expect(formatCurrency(1850)).toBe('$1,850')
+    expect(formatCurrency(-120)).toBe('-$120')
     expect(formatCurrency(null)).toBe('N/A')
     expect(formatCount(0)).toBe('0')
     expect(formatCount(undefined)).toBe('N/A')

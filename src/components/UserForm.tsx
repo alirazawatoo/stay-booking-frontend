@@ -26,7 +26,7 @@ const USER_TYPES: { value: UserType; label: string }[] = [
 ];
 
 const INPUT =
-  'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:outline-none focus:ring-red-500 sm:text-sm';
+  'mt-1 block w-full rounded-md border border-stone-300 px-3 py-2 shadow-sm focus:border-pine-600 focus:outline-none focus:ring-pine-500 sm:text-sm';
 
 const validationSchema = Yup.object({
   email: Yup.string().email('Invalid email address').required('Required'),
@@ -68,7 +68,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, initialData, onCancel }) 
         ] as const
       ).map(([name, label, type]) => (
         <div key={name}>
-          <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+          <label htmlFor={name} className="block text-sm font-medium text-stone-700">
             {label}
           </label>
           <input
@@ -83,7 +83,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, initialData, onCancel }) 
         </div>
       ))}
       <div>
-        <label htmlFor="user_type" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="user_type" className="block text-sm font-medium text-stone-700">
           User Type
         </label>
         <select id="user_type" {...formik.getFieldProps('user_type')} className={INPUT}>
@@ -95,7 +95,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, initialData, onCancel }) 
         </select>
       </div>
       <div>
-        <label htmlFor="is_active" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="is_active" className="block text-sm font-medium text-stone-700">
           Active
         </label>
         <select
@@ -112,7 +112,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, initialData, onCancel }) 
       <button
         type="submit"
         disabled={formik.isSubmitting}
-        className="flex w-full justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-60"
+        className="flex w-full justify-center rounded-md bg-pine-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-pine-800 disabled:opacity-60"
       >
         {initialData ? 'Update User' : 'Create User'}
       </button>
@@ -120,7 +120,7 @@ const UserForm: React.FC<UserFormProps> = ({ onSubmit, initialData, onCancel }) 
         <button
           type="button"
           onClick={onCancel}
-          className="mt-3 flex w-full justify-center rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-300"
+          className="mt-3 flex w-full justify-center rounded-md bg-stone-200 px-4 py-2 text-sm font-medium text-stone-700 shadow-sm hover:bg-stone-300"
         >
           Cancel
         </button>
