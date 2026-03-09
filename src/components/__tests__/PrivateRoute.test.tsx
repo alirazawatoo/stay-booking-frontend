@@ -3,19 +3,11 @@ import { Provider } from 'react-redux'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import PrivateRoute from '../PrivateRoute'
 import { configureStore } from '@reduxjs/toolkit'
-import authReducer from '../../store/slices/authSlice'
+import authReducer, { setToken } from '../../store/slices/authSlice'
 
 const renderWithStore = (token: string | null) => {
-  const store = configureStore({
-    reducer: {
-      auth: authReducer,
-    },
-    preloadedState: {
-      auth: {
-        token,
-      },
-    } as any,
-  })
+  const store = configureStore({ reducer: { auth: authReducer } })
+  if (token) store.dispatch(setToken(token))
 
   return render(
     <Provider store={store}>

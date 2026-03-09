@@ -1,6 +1,3 @@
-// rentalTypes.ts
-
-// Constants for Rental Property Status
 export enum RentalPropertyStatus {
   Pending = "Pending",
   Approved = "Approved",
@@ -8,26 +5,11 @@ export enum RentalPropertyStatus {
   Error = "Error"
 }
 
-// Constants for valid file extensions
 export const VALID_FILE_EXTENSIONS: string[] = [".xls", ".xlsx", ".csv"];
 
-// Required columns for rental property data
-export const REQUIRED_COLUMNS: string[] = [
-  "Location",
-  "Price",
-  "Sq. ft.",
-  "Ba",
-  "Br",
-  "Link"
-];
+// The import needs these spreadsheet columns; the API rejects files without them.
+export const REQUIRED_COLUMNS: string[] = ["Location", "Price", "Sq. ft.", "Ba", "Br", "Link"];
 
-// Important columns for processing rental property data
-export const IMPORTANT_COLUMNS: string[] = ["Ba", "Br", "Price", "Link"];
-
-// Currency type
-export const CURRENCY_USD = "usd";
-
-// Interface for RentalProperty
 export interface RentalProperty {
   created_at?: string | null;
   created_at_formatted?: string | null;
@@ -48,6 +30,12 @@ export interface RentalProperty {
   batch_id: number;
 }
 
-export interface AllPropertiesArgs {
-  page?: number;
+export interface FilteredRentalsResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    all_batch_ids: number[];
+    properties: RentalProperty[];
+  };
 }

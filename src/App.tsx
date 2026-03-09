@@ -1,100 +1,56 @@
-import { lazy, Suspense } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import Login from './pages/Login'
-const Dashboard = lazy(() => import('./pages/Dashboard'))
-const UpdatePassword = lazy(() => import('./pages/UpdatePassword'))
-import PrivateRoute from './components/PrivateRoute'
-const LeaseManagement = lazy(() => import('./pages/LeaseManagement'))
-const LeaseDetail = lazy(() => import('./pages/LeaseDetail'))
-const DocumentPreview = lazy(() => import('./pages/DocumentPreview'))
-const ViewNotes = lazy(() => import('./pages/ViewNotes'))
-import './App.css'
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
-const RegulationManagement = lazy(() => import('./pages/RegulationManagement'))
-const RegulationDetail = lazy(() => import('./pages/RegulationDetail'))
-const ViewRegulationChat = lazy(() => import('./pages/ViewRegulationChat'))
-const RentalManagement = lazy(() => import('./pages/RentalManagement'))
 
-const App: React.FC = () => {
-  return (
-    <Suspense fallback={<p role="status" className="p-8 text-slate-600">Loading workspace…</p>}><Routes>
+// Workspace pages load as separate chunks so the login page stays small.
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const UpdatePassword = lazy(() => import('./pages/UpdatePassword'));
+const LeaseManagement = lazy(() => import('./pages/LeaseManagement'));
+const LeaseDetail = lazy(() => import('./pages/LeaseDetail'));
+const DocumentPreview = lazy(() => import('./pages/DocumentPreview'));
+const ViewNotes = lazy(() => import('./pages/ViewNotes'));
+const RegulationManagement = lazy(() => import('./pages/RegulationManagement'));
+const NewRegulationSearch = lazy(() => import('./pages/NewRegulationSearch'));
+const ViewRegulationChat = lazy(() => import('./pages/ViewRegulationChat'));
+const RentalManagement = lazy(() => import('./pages/RentalManagement'));
+
+const privateRoutes: { path: string; element: React.ReactNode }[] = [
+  { path: '/dashboard', element: <Dashboard /> },
+  { path: '/update-password/:id', element: <UpdatePassword /> },
+  { path: '/leases', element: <LeaseManagement /> },
+  { path: '/lease/:id', element: <LeaseDetail /> },
+  {
+    path: '/preview/:documentId',
+    element: (
+      <Layout>
+        <DocumentPreview />
+      </Layout>
+    ),
+  },
+  { path: '/lease/:id/documents/:documentId/notes', element: <ViewNotes /> },
+  { path: '/regulations', element: <RegulationManagement /> },
+  { path: '/regulation/new', element: <NewRegulationSearch /> },
+  { path: '/regulation/:regulationId/chat', element: <ViewRegulationChat /> },
+  { path: '/rental-analyzer', element: <RentalManagement /> },
+];
+
+const App: React.FC = () => (
+  <Suspense
+    fallback={
+      <p role="status" className="p-8 text-slate-600">
+        Loading workspace…
+      </p>
+    }
+  >
+    <Routes>
       <Route path="/" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={
-          <PrivateRoute>
-            <Dashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route path="/update-password/:id" element={<PrivateRoute><UpdatePassword /></PrivateRoute>} />
-      <Route
-        path="/leases"
-        element={
-          <PrivateRoute>
-            <LeaseManagement />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/lease/:id"
-        element={
-          <PrivateRoute>
-            <LeaseDetail />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/preview/:documentId"
-        element={
-          <PrivateRoute>
-            <Layout>
-            <DocumentPreview />
-            </Layout>
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/lease/:id/documents/:documentId/notes"  // Updated route for ViewNotes using documentId
-        element={
-          <PrivateRoute>
-            <ViewNotes />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/regulations"
-        element={
-          <PrivateRoute>
-            <RegulationManagement />  {/* Added Regulation Management Route */}
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/regulation/:id"
-        element={
-          <PrivateRoute>
-            <RegulationDetail />  {/* Added Regulation Detail Route */}
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/regulation/:regulationId/chat"
-        element={
-          <PrivateRoute>
-            <ViewRegulationChat />  {/* Updated Regulation Chat Route */}
-          </PrivateRoute>
-        }
-      />
-      <Route path="/rental-analyzer" element={
-          <PrivateRoute>
-            <RentalManagement />
-          </PrivateRoute>
-        }
-      />
+      {privateRoutes.map(({ path, element }) => (
+        <Route key={path} path={path} element={<PrivateRoute>{element}</PrivateRoute>} />
+      ))}
+    </Routes>
+  </Suspense>
+);
 
-    </Routes></Suspense>
-  )
-}
-
-export default App
+export default App;

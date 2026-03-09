@@ -1,58 +1,26 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
-import { useGetUserProfileQuery} from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import type { User } from '@/types/userTypes';
 
-const UserDashboard: React.FC = () => {
-  const { data: user, isLoading } = useGetUserProfileQuery(undefined);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const token = useSelector((state: RootState) => state.auth.token);
-  // console.log('User:', user);
-
-  if (isLoading) {
-    return <p role="status" className="p-8 text-lg text-gray-700">Loading user information…</p>;
-  }
-  
-  if (!user) {
-    return <p role="alert" className="p-8 text-lg text-red-700">No user information available.</p>;
-  }
-
+const UserDashboard: React.FC<{ user: User }> = ({ user }) => {
+  const rows: [string, string][] = [
+    ['Email Address', user.email],
+    ['First Name', user.first_name],
+    ['Last Name', user.last_name],
+    ['User Type', user.user_type],
+    ['Status', user.is_active ? 'Active' : 'Inactive'],
+  ];
 
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-lg max-w-4xl pt-8 p-4 h-full sm:p-6 lg:p-8 mx-auto">
-      <div className="px-4 py-5 sm:px-6">
-        <h3 className="text-lg leading-6 font-medium text-gray-900">
-          User Information
-        </h3>
-      </div>
-      <div className="border-t border-gray-200">
-        <dl>
-          <div className="bg-gray-50 px-4 py-5 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Email Address</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.email}</dd>
+    <div className="mx-auto h-full max-w-4xl overflow-hidden bg-white p-4 pt-8 shadow sm:rounded-lg sm:p-6 lg:p-8">
+      <h1 className="px-4 py-5 text-lg font-medium leading-6 text-gray-900 sm:px-6">User Information</h1>
+      <dl className="border-t border-gray-200">
+        {rows.map(([label, value], index) => (
+          <div key={label} className={`grid grid-cols-1 px-4 py-5 sm:grid-cols-3 sm:gap-4 sm:px-6 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
+            <dt className="text-sm font-medium text-gray-600">{label}</dt>
+            <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">{value}</dd>
           </div>
-          <div className="bg-white px-4 py-5 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">First Name</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.first_name}</dd>
-          </div>
-          <div className="bg-gray-50 px-4 py-5 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Last Name</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.last_name}</dd>
-          </div>
-          <div className="bg-white px-4 py-5 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">User Type</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{user.user_type}</dd>
-          </div>
-          <div className="bg-gray-50 px-4 py-5 grid grid-cols-1 sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt className="text-sm font-medium text-gray-500">Status</dt>
-            <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-              {user.is_active ? 'Active' : 'Inactive'}
-            </dd>
-          </div>
-        </dl>
-      </div>
+        ))}
+      </dl>
     </div>
   );
 };

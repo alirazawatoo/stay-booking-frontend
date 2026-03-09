@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import RentalTable from '../components/RentalTable';
 import RentalSearchBar from '../components/RentalSearchBar';
 import UploadRentalModal from '../components/UploadRentalModal';
-import { useFilteredListQuery, useUploadPropertiesMutation, useDownloadCsvQuery, useGetTaskResultQuery, useTaskProgressQuery } from '../services/api';
 import Layout from '../components/Layout';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store';
-import { setLoading, toggleRefreshRentals, setPolling, setTask } from '../store/slices/authSlice'; // Import actions
-import { toast } from 'react-toastify';
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import PageMessage from '../components/PageMessage';
+import Pagination from '../components/Pagination';
+import {
+  RentalFilters,
+  useFilteredListQuery,
+  useUploadPropertiesMutation,
+  useLazyDownloadCsvQuery,
+  useGetTaskResultQuery,
+  useTaskProgressQuery,
+} from '../services/api';
+import { setLoading, toggleRefreshRentals, setPolling, setTask } from '../store/slices/authSlice';
+import type { RootState } from '@/store';
+import type { FilteredRentalsResponse } from '@/types/rentalTypes';
 import download from '@/assets/images/download.png';
 import upload from '@/assets/images/upload.png';
 
@@ -17,64 +27,39 @@ interface TaskResultPayload {
   message: string;
 }
 
+const ROWS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
+
 const RentalManagement = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [filters, setFilters] = useState<RentalFilters>({});
   const [isUploadModalOpen, setUploadModalOpen] = useState(false);
-  const [uploadProperties] = useUploadPropertiesMutation();
-
-  const [searchFilters, setSearchFilters] = useState({
-    batch_id: undefined,
-    status: undefined,
-    minProfit: undefined,
-    maxProfit: undefined,
-    startDate: undefined,
-    endDate: undefined,
-  });
-
-  const { data: filteredRentals, refetch, isLoading } = useFilteredListQuery({
-    ...searchFilters,
-    page,
-    pageSize: rowsPerPage, // Send the rows per page to the API
-  });
-
-  const { data: csvData, refetch: refetchCsvData } = useDownloadCsvQuery(searchFilters);
+  const dispatch = useDispatch();
 
   const refreshRentals = useSelector((state: RootState) => state.auth.refreshRentals);
-  const pageLoading = useSelector((state: RootState) => state.auth.isLoading); // Global loading state
-  const polling = useSelector((state: RootState) => state.auth.polling); // Polling state
+  const pageLoading = useSelector((state: RootState) => state.auth.isLoading);
+  const polling = useSelector((state: RootState) => state.auth.polling);
   const taskId = useSelector((state: RootState) => state.auth.taskId);
 
-  const { data: taskResult, refetch: refetchTaskResult } = useGetTaskResultQuery(taskId, {
-    skip: !taskId,
-  });
+  const { data, refetch, isLoading, isError } = useFilteredListQuery({ ...filters, page, pageSize: rowsPerPage });
+  const rentals = data as FilteredRentalsResponse | undefined;
+  // An unfiltered request lists every batch, so the batch picker never narrows itself.
+  const { data: allBatches, refetch: refetchBatchIds } = useFilteredListQuery({ pageSize: 1 });
+  const batchIds = (allBatches as FilteredRentalsResponse | undefined)?.results?.all_batch_ids ?? [];
 
-  const { data: taskProgressData, isFetching: isFetchingProgress } = useTaskProgressQuery(taskId, {
+  const [uploadProperties] = useUploadPropertiesMutation();
+  const [fetchCsv, { isFetching: isDownloading }] = useLazyDownloadCsvQuery();
+  const { refetch: refetchTaskResult } = useGetTaskResultQuery(taskId ?? '', { skip: !taskId });
+  const { data: taskProgress, isFetching: isFetchingProgress } = useTaskProgressQuery(taskId ?? '', {
     skip: !taskId,
     pollingInterval: 5000,
   });
-
-  const progressPercentage = taskProgressData?.progress || 0;
-
-  const dispatch = useDispatch();
-
-  const [allBatchIds, setAllBatchIds] = useState<number[]>([]); // State for all batch ids
-
-  const { data: batchIdData, refetch: refetchBatchIds } = useFilteredListQuery({}); // Assuming this query fetches all batch ids
-
-  useEffect(() => {
-    if (batchIdData?.results?.all_batch_ids) {
-      setAllBatchIds(batchIdData.results.all_batch_ids);
-    }
-  }, [batchIdData]);
-
-  useEffect(() => {
-    refetchBatchIds();
-  }, [refreshRentals, refetchBatchIds]);
+  const progressPercentage: number = taskProgress?.progress || 0;
 
   useEffect(() => {
     refetch();
-  }, [refreshRentals, refetch, rowsPerPage]);
+    refetchBatchIds();
+  }, [refreshRentals, refetch, refetchBatchIds]);
 
   useEffect(() => {
     if (!polling || !taskId) return;
@@ -85,7 +70,6 @@ const RentalManagement = () => {
       if (succeeded) toast.success('Task completed successfully!');
       else toast.error('Task processing failed.');
       dispatch(toggleRefreshRentals());
-      refetchCsvData();
       dispatch(setLoading(false));
     };
 
@@ -105,44 +89,27 @@ const RentalManagement = () => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [polling, taskId, refetchTaskResult, dispatch, refetchCsvData]);
+  }, [polling, taskId, refetchTaskResult, dispatch]);
 
   const handleUploadRental = async (file: FormData) => {
+    dispatch(setLoading(true));
     try {
-      dispatch(setLoading(true));
       const response = await uploadProperties(file).unwrap();
       if (response.task_id) {
         dispatch(setTask(response.task_id));
-        dispatch(setPolling(true)); // Start polling
+        dispatch(setPolling(true));
+      } else {
+        dispatch(setLoading(false));
       }
-      // After successful upload, update the batch_id in the search filters
-      if (response.batch_id) {
-        setSearchFilters((prevFilters) => {
-          const newFilters = { ...prevFilters, batch_id: response.batch_id };
-          return newFilters;
-        });
-      }
-      // Refetch batch ids after upload
-      refetchBatchIds();
     } catch (error) {
       dispatch(setLoading(false));
       throw error;
     }
   };
 
-  useEffect(() => {
-    if (searchFilters.batch_id) {
-      refetch();
-    }
-  }, [searchFilters.batch_id, refetch]);
-
-  const handleSearch = (filters: any) => {
-    setSearchFilters(filters);
-    setPage(1); // Reset to first page when applying new filters
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
+  const handleSearch = (nextFilters: RentalFilters) => {
+    setFilters(nextFilters);
+    setPage(1);
   };
 
   const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -150,110 +117,102 @@ const RentalManagement = () => {
     setPage(1);
   };
 
-  const handleDownloadCsv = (csvData: string | null) => {
-    if (csvData) {
-      const blob = new Blob([csvData], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'rental_properties_report.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+  // Fetched on click with the current filters, rather than on every filter change.
+  const handleDownloadCsv = async () => {
+    try {
+      const csv = await fetchCsv(filters).unwrap();
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'rental_properties_report.csv';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
       toast.success('CSV download successful!');
-    } else {
-      console.error('Error: No CSV data found');
+    } catch {
       toast.error('Error downloading CSV');
     }
   };
 
+  const isBusy = isFetchingProgress || pageLoading;
+  const total = rentals?.count ?? 0;
+  const firstRow = total === 0 ? 0 : (page - 1) * rowsPerPage + 1;
+
   return (
     <Layout>
-      {/* Progress Bar with Percentage Centered */}
-      {taskId && (
-        <div className="absolute inset-0 flex justify-center items-center z-10">
-          <div className="w-1/3 bg-gray-200 rounded-full h-4">
-            <div
-              className="bg-red-500 h-4 rounded-full "
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-      )}
-
-      {/* Overlay for Blurring Content */}
       {polling && taskId && (
-        <div className="absolute inset-0 bg-gray-500 bg-opacity-50 z-10 flex justify-center items-center">
-          <div className="text-white text-lg font-bold">Processing... {progressPercentage}%</div>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 bg-gray-500 bg-opacity-50" role="status">
+          <p className="text-lg font-bold text-white">Processing… {progressPercentage}%</p>
+          <div
+            className="h-4 w-1/3 rounded-full bg-gray-200"
+            role="progressbar"
+            aria-valuenow={progressPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Import progress"
+          >
+            <div className="h-4 rounded-full bg-red-500" style={{ width: `${progressPercentage}%` }} />
+          </div>
         </div>
       )}
 
-
-      <div className="p-4 flex-1 bg-white w-full mx-auto relative">
-        <div className="flex flex-col md:flex-row md:justify-between items-center mb-4 space-y-2 md:space-y-0 mt-7">
-          <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-xl font-bold">Your Rental Properties</h2>
-          </div>
-          <div className="flex flex-row justify-end items-center space-x-2">
+      <div className="relative mx-auto w-full flex-1 bg-white p-4">
+        <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
+          <h1 className="text-xl font-bold">Your Rental Properties</h1>
+          <div className="flex flex-row items-center justify-end space-x-2">
             <button
-              onClick={() => handleDownloadCsv(csvData)}
-              className={`bg-red-500 text-white px-4 py-3 rounded hover:bg-red-600 flex items-center space-x-2`}
-              disabled={isFetchingProgress} // Disable during progress fetching
+              type="button"
+              onClick={handleDownloadCsv}
+              className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+              disabled={isBusy || isDownloading}
             >
-              <img src={download} alt="Download Icon" className="w-5 h-5" />
-              <span>Download CSV</span>
+              <img src={download} alt="" className="h-5 w-5" />
+              <span>{isDownloading ? 'Preparing CSV…' : 'Download CSV'}</span>
             </button>
             <button
+              type="button"
               onClick={() => setUploadModalOpen(true)}
-              className={`bg-red-500 text-white px-4 py-3 rounded hover:bg-red-600 flex items-center space-x-2`}
-              disabled={isFetchingProgress} // Disable during progress fetching
+              className="flex items-center space-x-2 rounded bg-red-500 px-4 py-3 text-white hover:bg-red-600 disabled:opacity-60"
+              disabled={isBusy}
             >
-              <img src={upload} alt="Upload Icon" className="w-5 h-5" />
+              <img src={upload} alt="" className="h-5 w-5" />
               <span>Upload Properties</span>
             </button>
           </div>
         </div>
-        <RentalSearchBar onSearch={handleSearch} />
-        <RentalTable rentals={filteredRentals?.results?.properties || []} />
-        {/* Pagination Controls */}
-        <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => handlePageChange(page - 1)}
-            disabled={page === 1 || isFetchingProgress || pageLoading}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <div className="flex justify-center items-center space-x-4">
-            <div className="flex items-center">
+        <RentalSearchBar onSearch={handleSearch} batchIds={batchIds} />
+
+        {isLoading ? (
+          <PageMessage kind="loading">Loading rental properties…</PageMessage>
+        ) : isError ? (
+          <PageMessage kind="error">Error loading rental properties. Check the filters and that the API is running.</PageMessage>
+        ) : (
+          <RentalTable rentals={rentals?.results?.properties ?? []} />
+        )}
+
+        <Pagination page={page} hasNext={Boolean(rentals?.next)} onPageChange={setPage} disabled={isBusy}>
+          <div className="flex items-center justify-center space-x-4">
+            <label className="flex items-center">
               <span className="mr-2">Rows per page:</span>
               <select
                 value={rowsPerPage}
                 onChange={handleRowsPerPageChange}
-                className="px-2 py-1 border rounded border-red-600 focus:border-red-600 focus:outline-none"
+                className="rounded border border-red-600 px-2 py-1 focus:border-red-600 focus:outline-none"
               >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
+                {ROWS_PER_PAGE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
-            </div>
+            </label>
             <span>
-              {(page - 1) * rowsPerPage + 1} -{' '}
-              {Math.min(page * rowsPerPage, filteredRentals?.count || 0)} of{' '}
-              {filteredRentals?.count || 0}
+              {firstRow} - {Math.min(page * rowsPerPage, total)} of {total}
             </span>
           </div>
-          <button
-            onClick={() => handlePageChange(page + 1)}
-            disabled={!filteredRentals?.next || isFetchingProgress || pageLoading}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
+        </Pagination>
 
-        {/* Upload Rental Modal */}
         <UploadRentalModal
           isOpen={isUploadModalOpen}
           onClose={() => setUploadModalOpen(false)}

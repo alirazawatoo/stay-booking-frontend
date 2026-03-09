@@ -1,17 +1,18 @@
 import React from 'react';
-import { api, useLogoutMutation } from '../services/api';
 import { useDispatch } from 'react-redux';
-import { logout as logoutAction } from '../store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { api, useLogoutMutation } from '../services/api';
+import { logout as logoutAction } from '../store/slices/authSlice';
 
 interface HeaderDropdownProps {
   isOpen: boolean;
   onClose: () => void;
-  onChangePassword: () => void; // Add this prop
-  userInitials: string;
+  onChangePassword: () => void;
 }
 
-const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ isOpen, onClose, onChangePassword, userInitials }) => {
+const ITEM = 'block w-full rounded-md bg-white px-4 py-2 text-left text-gray-700 transition duration-200 hover:bg-gray-200 hover:text-black';
+
+const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ isOpen, onClose, onChangePassword }) => {
   const [logout] = useLogoutMutation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,16 +33,18 @@ const HeaderDropdown: React.FC<HeaderDropdownProps> = ({ isOpen, onClose, onChan
   if (!isOpen) return null;
 
   return (
-    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-      <button
-        onClick={handleLogout}
-        className="block w-full text-left px-4 py-2 bg-white text-gray-700 rounded-md hover:text-black hover:bg-gray-200 transition duration-200 hover:font-bold"
-      >
+    <div role="menu" className="absolute right-0 z-50 mt-2 w-48 rounded-md bg-white shadow-lg">
+      <button type="button" role="menuitem" onClick={handleLogout} className={ITEM}>
         Logout
       </button>
-      <button 
-        onClick={() => { onChangePassword(); onClose(); }} // Call both functions
-        className="block w-full text-left px-4 py-2 bg-white text-gray-700 rounded-md hover:text-black hover:bg-gray-200 transition duration-200 hover:font-bold"
+      <button
+        type="button"
+        role="menuitem"
+        onClick={() => {
+          onChangePassword();
+          onClose();
+        }}
+        className={ITEM}
       >
         Change Password
       </button>

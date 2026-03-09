@@ -1,211 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useChatWithGptMutation } from '../services/api';
-import dayjs from 'dayjs';
-import { Lease } from '@/types/leaseTypes';
-import ReactMarkdown from 'react-markdown';
 import usePollingChatHistory from '@/hooks/leasePollingChatHistory';
-import { parseServerTimestamp } from '@/utils/dates';
 import { toggleRefreshDocuments } from '@/store/slices/authSlice';
-import { useDispatch} from 'react-redux';
+import { parseServerTimestamp } from '@/utils/dates';
+import type { ChatHistoryResponse } from '@/types/chatTypes';
+import ChatPanel from './ChatPanel';
 
 const ANALYSIS_POLL_WINDOW_MS = 20 * 60 * 1000;
 
-interface Message {
-  text: string;
-  sender: 'user' | 'system';
-  timestamp: string;
-}
-
-interface ChatBoxProps {
-  documentId: string | undefined;
-  lease: Lease | null;
-}
-
-const ChatBox: React.FC<ChatBoxProps> = ({ documentId, lease }) => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [summary, setSummary] = useState<string | null>(null);
-  const [summaryCreatedTime, setSummaryCreatedTime] = useState<string | null>(null);
-  const [isGPTTyping, setIsGPTTyping] = useState(false);
+const ChatBox: React.FC<{ documentId: string | undefined }> = ({ documentId }) => {
   const [shouldPoll, setShouldPoll] = useState(true);
-
   const dispatch = useDispatch();
-
   const { data, error, refetch } = usePollingChatHistory(documentId, shouldPoll);
-  const [chatWithGpt, { isLoading: isSendingMessage }] = useChatWithGptMutation();
-
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
-  // Helper function to format timestamp
-  const formatTimestamp = (timestamp: string): string => {
-    return dayjs(timestamp).format('DD/MM/YYYY hh:mm A');
-  };
-
-  // Function to handle sending a new message
-  const handleSendMessage = async () => {
-    if (input.trim() && documentId) {
-      const newUserMessage: Message = {
-        text: input,
-        sender: 'user',
-        timestamp: formatTimestamp(new Date().toISOString()),
-      };
-      setMessages((prevMessages) => [...prevMessages, newUserMessage]);
-      setInput('');
-      setIsGPTTyping(true);
-      setShouldPoll(false);
-
-      try {
-        const response = await chatWithGpt({ documentId, message: input }).unwrap();
-        refetch(); // Refetch immediately after sending
-        setShouldPoll(true); // Resume polling
-
-        const systemResponse: Message = {
-          text: response.response,
-          sender: 'system',
-          timestamp: formatTimestamp(response.chat_history.slice(-1)[0]?.timestamp || new Date().toISOString()),
-        };
-        setMessages((prevMessages) => [...prevMessages, systemResponse]);
-
-        // Update summary if available
-        if (!summary && response.summary) {
-          setSummary(response.summary);
-        }
-        // Store summary created time if available
-        if (data?.gpt_response?.timestamp) {
-          setSummaryCreatedTime(data.gpt_response.timestamp);
-        }
-      } catch (err) {
-        console.error('Error chatting with GPT:', err);
-      } finally {
-        setIsGPTTyping(false);
-      }
-    }
-  };
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInput(event.target.value);
-  };
-
-  // Map chat history from backend response
-  const mapChatHistory = (chatHistory: any[]): Message[] => {
-    return chatHistory
-      .filter((msg) => msg?.content) // Filter out invalid messages
-      .map((msg) => ({
-        text: msg.content,
-        sender: msg.role === 'user' ? 'user' : 'system',
-        timestamp: formatTimestamp(msg.timestamp),
-      }));
-  };
+  const history = data as ChatHistoryResponse | undefined;
+  const [chatWithGpt] = useChatWithGptMutation();
 
   // The initial analysis runs in a background task. Poll until it reports a
   // result, but give up 20 minutes after upload so a lost task cannot poll forever.
   useEffect(() => {
-    if (!shouldPoll || !data) return;
-    const uploadedAt = parseServerTimestamp(data.document_uploaded_at);
+    if (!shouldPoll || !history) return;
+    const uploadedAt = parseServerTimestamp(history.document_uploaded_at);
     const pollingExpired = uploadedAt !== null && Date.now() - uploadedAt > ANALYSIS_POLL_WINDOW_MS;
-    const status = data.gpt_response?.status;
+    const status = history.gpt_response?.status;
     if (pollingExpired || (status && status !== 'Pending')) {
       setShouldPoll(false);
       dispatch(toggleRefreshDocuments());
     }
-  }, [shouldPoll, data, dispatch]);
+  }, [shouldPoll, history, dispatch]);
 
-  // Fetch chat history on load or when data changes
-  useEffect(() => {
-    if (data?.chat_history && Array.isArray(data.chat_history)) {
-      setMessages(mapChatHistory(data.chat_history));
+  const sendMessage = async (message: string) => {
+    if (!documentId) return;
+    await chatWithGpt({ documentId, message }).unwrap();
+    await refetch();
+  };
 
-      // Update the summary if it's available and different from the current one
-      if (data.gpt_response?.message && data.gpt_response.message !== summary) {
-        setSummary(data.gpt_response.message);
-      }
-      // Update summary created time if available
-      if (data.gpt_response?.timestamp) {
-        setSummaryCreatedTime(data.gpt_response.timestamp);
-      }
-    }
-  }, [data, documentId, lease]);
-
-  if (error) {
-    return <p role="alert" className="mx-8 text-lg text-red-700">Error loading chat history.</p>;
-  }
-
-  // Group messages by pairs and reverse the groups
-  const groupedMessages = [];
-  for (let i = 0; i < messages.length; i += 2) {
-    // Ensure both messages exist before pushing
-    if (messages[i] && messages[i + 1]) {
-      groupedMessages.push([messages[i], messages[i + 1]]);
-    } else if (messages[i]) {
-      groupedMessages.push([messages[i]]);
-    }
-  }
-  groupedMessages.reverse();
-
-  return (
-    <div className="text-left ml-8 mr-8">
-
-      <div className="flex items-center justify-start space-x-2 mb-10 pl-3">
-        <input
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          className="border p-2 w-full sm:w-80 md:w-96 lg:w-1/2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
-          placeholder="Type your message to send it to LeaseGuard AI..."
-        />
-        <button
-          onClick={handleSendMessage}
-          disabled={isSendingMessage || !input.trim()}
-          className="p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          Send
-        </button>
-      </div>
-
-      <div className="chat-messages overflow-y-auto mb-6 p-4 pl-0" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-        {isGPTTyping && <div className="text-gray-500 italic text-center">LeaseGuard AI is typing...</div>}
-          {groupedMessages.map((group, index) => (
-            <React.Fragment key={index}>
-              {group.map((message, idx) => (
-                <div key={idx} className="mb-2 text-left">
-                  {message?.text ? (
-                    <div className="inline-block p-3 rounded max-w-7xl bg-transparent text-black">
-                      <ReactMarkdown>{message.text}</ReactMarkdown>
-                      <div className="text-xs text-gray-500 mt-1">{message.timestamp}</div>
-                    </div>
-                  ) : (
-                    <div className="text-red-500">Error: Message content missing</div>
-                  )}
-                </div>
-              ))}
-            </React.Fragment>
-          ))}
-
-        {summary && (
-          <div className="mb-2 p-4 items-center justify-center">
-            <strong>Initial Analysis</strong> 
-            {summaryCreatedTime && (
-              <div className="text-xs text-gray-500 mb-7">
-                {formatTimestamp(summaryCreatedTime)}
-              </div>
-            )}
-            <ReactMarkdown
-              components={{
-                
-                p: ({node, ...props}) => (
-                  <p style={{marginBottom: "2rem"}} {...props} />
-                ),
-              }}
-            >
-              {summary}
-            </ReactMarkdown>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-      
-    </div>
-  );
+  return <ChatPanel assistantName="LeaseGuard AI" history={history} hasError={Boolean(error)} onSend={sendMessage} />;
 };
 
 export default ChatBox;

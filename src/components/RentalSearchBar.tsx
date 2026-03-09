@@ -1,173 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import React, { useState } from 'react';
+import DateRangeInput from './DateRangeInput';
 import { RentalPropertyStatus } from '../types/rentalTypes';
-import { useFilteredListQuery } from '../services/api'; // Assuming this hook fetches the data
+import type { RentalFilters } from '../services/api';
 
 interface RentalSearchBarProps {
-  onSearch: (filters: RentalSearchFilters) => void;
+  onSearch: (filters: RentalFilters) => void;
+  batchIds: number[];
 }
 
-interface RentalSearchFilters {
-  min_profit?: number;
-  max_profit?: number;
-  status?: RentalPropertyStatus;
-  start_date?: string;
-  end_date?: string;
-  batch_id?: number;
-}
+// The rental filter endpoint expects "Month day, year" dates (e.g. "December 3, 2024").
+const formatFilterDate = (date: Date): string =>
+  date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-const RentalSearchBar: React.FC<RentalSearchBarProps> = ({ onSearch }) => {
-  const [minProfit, setMinProfit] = useState<number | ''>('');
-  const [maxProfit, setMaxProfit] = useState<number | ''>('');
-  const [batchId, setBatchId] = useState<number | ''>('');
-  const [status, setStatus] = useState<string>('');
+const toNumber = (value: string): number | undefined => (value === '' ? undefined : Number(value));
+
+const FIELD = 'w-full rounded-lg border bg-gray-50 p-2';
+
+const RentalSearchBar: React.FC<RentalSearchBarProps> = ({ onSearch, batchIds }) => {
+  const [minProfit, setMinProfit] = useState('');
+  const [maxProfit, setMaxProfit] = useState('');
+  const [batchId, setBatchId] = useState('');
+  const [status, setStatus] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [allBatchIds, setAllBatchIds] = useState<number[]>([]); // State for all batch ids
+  const [error, setError] = useState('');
 
-  const { data } = useFilteredListQuery({});
-  // console.log(data);
-
-  useEffect(() => {
-    if (data?.results?.all_batch_ids) {
-      setAllBatchIds(data?.results?.all_batch_ids);
-    }
-  }, [data]);
-
-  // Helper function to format dates as "Month Day, Year"
-  const formatDate = (date: string | Date): string => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return new Date(date).toLocaleDateString('en-US', options);
-  };
-
-  const handleSearch = () => {
-    // Validate date range
-    if (startDate && endDate && startDate > endDate) {
-      setError('Start date must be before end date.');
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
+    const min = toNumber(minProfit);
+    const max = toNumber(maxProfit);
+    if (min !== undefined && max !== undefined && min > max) {
+      setError('Minimum profit must not be greater than maximum profit.');
       return;
-    } else {
-      setError(null); // Clear any previous error
     }
-
-    const formattedStartDate = startDate ? formatDate(startDate) : undefined;
-    const formattedEndDate = endDate ? formatDate(endDate) : undefined;
-
-    const filters: RentalSearchFilters = {
-      min_profit: minProfit ? minProfit : undefined,
-      max_profit: maxProfit ? maxProfit : undefined,
-      batch_id: batchId ? batchId : undefined,
-      start_date: formattedStartDate,
-      end_date: formattedEndDate,
-    };
-
-    // Only include status in the filters if it's not an empty string
-    if (status) {
-      filters.status = status as RentalPropertyStatus;
-    }
-
-    onSearch(filters);
+    setError('');
+    onSearch({
+      min_profit: min,
+      max_profit: max,
+      batch_id: toNumber(batchId),
+      status: status || undefined,
+      start_date: startDate ? formatFilterDate(startDate) : undefined,
+      end_date: endDate ? formatFilterDate(endDate) : undefined,
+    });
   };
 
   return (
-    <div className="bg-gray-100 p-4 rounded-lg flex flex-col gap-4 items-start md:items-center lg:items-start relative">
-      <div className="flex flex-wrap gap-4 w-full">
-        {/* Min Profit */}
-        <input
-          type="number"
-          value={minProfit}
-          onChange={(e) => setMinProfit(e.target.value ? parseInt(e.target.value) : '')}
-          placeholder="Min Profit"
-          className="p-2 border rounded-lg bg-gray-50 w-full md:w-[calc(50%-8px)] lg:w-auto"
-        />
-
-        {/* Max Profit */}
-        <input
-          type="number"
-          value={maxProfit}
-          onChange={(e) => setMaxProfit(e.target.value ? parseInt(e.target.value) : '')}
-          placeholder="Max Profit"
-          className="p-2 border rounded-lg bg-gray-50 w-full md:w-[calc(50%-8px)] lg:w-auto"
-        />
-
-        {/* Batch ID Dropdown */}
-        <div className="relative w-full md:w-[calc(50%-8px)] lg:w-auto">
-          <select
-            value={batchId}
-            onChange={(e) => setBatchId(e.target.value ? parseInt(e.target.value) : '')}
-            className="p-2 border rounded-lg bg-gray-50 w-full appearance-none pr-8"
-          >
-            <option value="">Select Batch ID</option>
-            {allBatchIds.map((id) => (
+    <form role="search" onSubmit={handleSearch} className="rounded-lg bg-gray-100 p-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+        <label>
+          <span className="sr-only">Minimum monthly profit</span>
+          <input type="number" value={minProfit} onChange={(event) => setMinProfit(event.target.value)} placeholder="Min Profit" className={FIELD} />
+        </label>
+        <label>
+          <span className="sr-only">Maximum monthly profit</span>
+          <input type="number" value={maxProfit} onChange={(event) => setMaxProfit(event.target.value)} placeholder="Max Profit" className={FIELD} />
+        </label>
+        <label>
+          <span className="sr-only">Batch</span>
+          <select value={batchId} onChange={(event) => setBatchId(event.target.value)} className={FIELD}>
+            <option value="">All batches</option>
+            {batchIds.map((id) => (
               <option key={id} value={id}>
-                Batch ID {id}
+                Batch {id}
               </option>
             ))}
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Status Dropdown */}
-        <div className="relative w-full md:w-[calc(50%-8px)] lg:w-auto">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="p-2 border rounded-lg bg-gray-50 w-full appearance-none pr-8"
-          >
-            <option value="">Select Status</option>
-            {/* <option value={RentalPropertyStatus.Pending}>Pending</option> */}
+        </label>
+        <label>
+          <span className="sr-only">Zillow status</span>
+          <select value={status} onChange={(event) => setStatus(event.target.value)} className={FIELD}>
+            <option value="">Any status</option>
             <option value={RentalPropertyStatus.Approved}>Approved</option>
             <option value={RentalPropertyStatus.Rejected}>Rejected</option>
             <option value={RentalPropertyStatus.Error}>Error</option>
           </select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-            <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Date Picker Range */}
-        <div className="relative w-full lg:w-auto">
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => {
-              const [start, end] = date;
-              setStartDate(start);
-              setEndDate(end);
-            }}
-            startDate={startDate as Date}
-            endDate={endDate as Date}
-            selectsRange
-            placeholderText="Select Date Range"
-            className="p-2 border rounded-lg bg-gray-50 w-full lg:w-auto"
-            todayButton="Today"
-          />
-        </div>
-      </div>
-
-      {/* Search Button */}
-      <div className="flex w-full justify-center lg:justify-end lg:absolute lg:top-4 lg:right-4 lg:w-auto mt-4 md:mt-0">
-        <button
-          onClick={handleSearch}
-          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors w-full md:w-auto"
-        >
+        </label>
+        <DateRangeInput
+          startDate={startDate}
+          endDate={endDate}
+          onChange={(start, end) => {
+            setStartDate(start);
+            setEndDate(end);
+          }}
+        />
+        <button type="submit" className="rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700">
           Search
         </button>
       </div>
-
-      {/* Error Message */}
-      {error && <div className="text-red-500 mt-2 w-full text-center md:text-left">{error}</div>}
-    </div>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </form>
   );
 };
 

@@ -1,73 +1,47 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useGetUserProfileQuery } from '../services/api'; 
-import Modal from './Modal'; 
-import ChangePasswordForm from './ChangePasswordForm'; 
-import HeaderDropdown from './HeaderDropdown'; 
+import { useGetUserProfileQuery } from '../services/api';
+import Modal from './Modal';
+import ChangePasswordForm from './ChangePasswordForm';
+import HeaderDropdown from './HeaderDropdown';
 import bnbLogo from '@/assets/images/bnb_logo.png';
 
 const Header: React.FC = () => {
-  const { data: user, isLoading } = useGetUserProfileQuery(undefined);
-  const [dropdownOpen, setDropdownOpen] = useState(false); 
-  const dropdownRef = useRef<HTMLDivElement | null>(null); 
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const { data: user } = useGetUserProfileQuery(undefined);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const getEmailInitials = (email: string) => {
-    const namePart = email.split('@')[0]; 
-    return namePart.charAt(0).toUpperCase(); 
-  };
-
-  const userInitials = user && user.email ? getEmailInitials(user.email) : 'N/A';
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : '?';
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
       }
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [dropdownRef]);
-
-  if (isLoading) return null;
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 flex items-center justify-between bg-red-500 p-2 z-50 shadow-lg">
-      <div className="flex items-center">
-        <img src={bnbLogo} alt="bnb University Logo" className="h-14" />
-      </div>
+    <header className="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-red-500 p-2 shadow-lg">
+      <img src={bnbLogo} alt="bnb University Logo" className="h-14" />
       <div className="relative" ref={dropdownRef}>
-        <div 
-          className="bg-gray-300 rounded-full w-10 h-10 flex items-center justify-center cursor-pointer transition duration-300 hover:bg-gray-400"
-          onClick={toggleDropdown} 
+        <button
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded={dropdownOpen}
+          aria-label="Account menu"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-300 font-semibold text-gray-700 transition duration-300 hover:bg-gray-400"
+          onClick={() => setDropdownOpen((open) => !open)}
         >
-          <span className="text-gray-700 font-semibold">{userInitials}</span>
-        </div>
-        <HeaderDropdown 
-          isOpen={dropdownOpen} 
-          onClose={toggleDropdown} 
-          onChangePassword={handleOpenModal} // Pass the modal opening function
-          userInitials={userInitials} 
-        />
+          {userInitial}
+        </button>
+        <HeaderDropdown isOpen={dropdownOpen} onClose={() => setDropdownOpen(false)} onChangePassword={() => setIsModalOpen(true)} />
       </div>
 
-      {/* Modal for Change Password */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <ChangePasswordForm onClose={handleCloseModal} />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Change password">
+        <ChangePasswordForm onClose={() => setIsModalOpen(false)} />
       </Modal>
     </header>
   );

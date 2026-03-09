@@ -1,138 +1,74 @@
-import React, { useState, useEffect } from 'react';
-import { useGetUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation} from '../services/api';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import UserForm from './UserForm';
-import UserList, { User } from './UserList';
+import { useGetUsersQuery, useCreateUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '../services/api';
+import UserForm, { UserFormValues } from './UserForm';
+import UserList from './UserList';
 import Chart from './Chart';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
+import PageMessage from './PageMessage';
+import type { User, UserPage } from '@/types/userTypes';
 
 const AdminDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const { data: users, isLoading, isError, refetch } = useGetUsersQuery(currentPage);
+  const { data, isLoading, isError, refetch } = useGetUsersQuery(currentPage);
+  const users = data as UserPage | undefined;
   const [createUser] = useCreateUserMutation();
   const [updateUser] = useUpdateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // undefined: dialog closed; null: creating a user; a User: editing that user.
+  const [editing, setEditing] = useState<User | null | undefined>(undefined);
 
-  const [userList, setUserList] = useState<User[]>(users?.results || []); // Local state for user list
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const closeDialog = () => setEditing(undefined);
 
-  useEffect(() => {
-    if (users) {
-      setUserList(users.results); // Update local user list whenever fetched users change
-    }
-  }, [users]);
-
-  const handleCreateUser = async (userData : User ) => {
+  const handleSubmit = async (values: UserFormValues) => {
     try {
-      await createUser(userData).unwrap();
-      toast.success('User created successfully');
-      refetch(); // Refetch the users after creating a new user
-      setIsModalOpen(false);
-      setIsCreating(false);
-    } catch (err) {
-      toast.error('Failed to create user');
+      if (editing) {
+        await updateUser({ ...values, id: editing.id }).unwrap();
+        toast.success('User updated successfully');
+      } else {
+        await createUser(values).unwrap();
+        toast.success('User created successfully');
+      }
+      refetch();
+      closeDialog();
+    } catch {
+      toast.error(editing ? 'Failed to update user' : 'Failed to create user');
     }
   };
 
-  const handleUpdateUser = async (userData : User ) => {
+  const handleDeleteUser = async (user: User) => {
+    if (!window.confirm(`Delete ${user.email}? This cannot be undone.`)) return;
     try {
-      await updateUser({...userData, id: userData.id }).unwrap();
-      toast.success('User updated successfully');
-      refetch(); // Refetch the users after updating a user
-      setSelectedUser(null);
-      setIsModalOpen(false);
-    } catch (err) {
-      toast.error('Failed to update user');
-    }
-  };
-
-  const handleDeleteUser = async (id : number) => {
-    try {
-      await deleteUser(id).unwrap();
+      await deleteUser(user.id).unwrap();
       toast.success('User deleted successfully');
-      refetch(); // Refetch the users after deleting a user
-    } catch (err) {
+      refetch();
+    } catch {
       toast.error('Failed to delete user');
     }
   };
 
-  useEffect(() => {
-    refetch(); // Fetch data on component mount and when currentPage changes
-  }, [currentPage, refetch]);
-
-  if (isLoading) {
-    return <p role="status" className="p-8 text-lg text-gray-700">Loading users…</p>;
-  }
-  
-  if (isError) {
-    return <p role="alert" className="p-8 text-lg text-red-700">Error loading users.</p>;
-  }
+  if (isLoading) return <PageMessage kind="loading">Loading users…</PageMessage>;
+  if (isError || !users) return <PageMessage kind="error">Error loading users.</PageMessage>;
 
   return (
-    <div className="p-4 flex-1 bg-white w-full mx-auto">
-      <div className="flex flex-col md:flex-row md:justify-between items-center mb-4 space-y-2 md:space-y-0 mt-7">
-        <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-xl font-bold">Dashboard</h2> 
-        </div>
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-          onClick={() => {
-            setIsCreating(true);
-            setIsModalOpen(true);
-            setSelectedUser(null);
-          }}
-          >
+    <div className="mx-auto w-full flex-1 bg-white p-4">
+      <div className="mb-4 mt-7 flex flex-col items-center space-y-2 md:flex-row md:justify-between md:space-y-0">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <button type="button" className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600" onClick={() => setEditing(null)}>
           Create New User
         </button>
       </div>
 
-        <Modal isOpen={isModalOpen} onClose={() => {
-          setIsModalOpen(false);
-          setIsCreating(false);
-          setSelectedUser(null);
-        }}>
-          {isCreating ? (
-            <UserForm
-              onSubmit={handleCreateUser}
-              initialData={null}
-              onCancel={() => {
-                setIsCreating(false);
-                setIsModalOpen(false);
-              }}
-            />
-          ) : selectedUser ? (
-            <UserForm
-              onSubmit={handleUpdateUser}
-              initialData={selectedUser}
-              onCancel={() => {
-                setSelectedUser(null);
-                setIsModalOpen(false);
-              }}
-            />
-          ) : null}
-        </Modal>
+      <Modal isOpen={editing !== undefined} onClose={closeDialog} title={editing ? 'Edit user' : 'Create user'}>
+        <UserForm key={editing?.id ?? 'new'} onSubmit={handleSubmit} initialData={editing ?? null} onCancel={closeDialog} />
+      </Modal>
 
-        <UserList
-          users={users} // Use local state for users
-          onEdit={(user) => {
-            setSelectedUser(user);
-            setIsCreating(false);
-            setIsModalOpen(true);
-          }}
-          onDelete={handleDeleteUser}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-        />
-      <div className='p-10 flex-1 bg-white w-full mx-auto'>
-        <h2 className="text-2xl font-bold mb-4">User Statistics for Page {currentPage}</h2>
-        <Chart data={userList} /> {/* Use local state for user statistics */}
-      </div>
+      <UserList users={users} onEdit={setEditing} onDelete={handleDeleteUser} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+      <section className="mx-auto w-full flex-1 bg-white p-10">
+        <h2 className="mb-4 text-2xl font-bold">User types on this page</h2>
+        <Chart data={users.results} />
+      </section>
     </div>
   );
 };

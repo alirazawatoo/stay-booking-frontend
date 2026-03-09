@@ -21,88 +21,84 @@ export interface User {
   is_first_login: boolean
 }
 
-// Fetch token from localStorage on initialization if needed
-const token = localStorage.getItem('token')
+// Older builds stored the raw password for "remember me"; remove it on load.
 localStorage.removeItem('password')
+
 export function readPersistedUser(): User | null {
   try {
     const value = JSON.parse(localStorage.getItem('user') || 'null')
-    return value && typeof value.id === 'number' && typeof value.email === 'string' && typeof value.user_type === 'string' ? value : null
-  } catch { localStorage.removeItem('user'); return null }
+    return value && typeof value.id === 'number' && typeof value.email === 'string' && typeof value.user_type === 'string'
+      ? value
+      : null
+  } catch {
+    localStorage.removeItem('user')
+    return null
+  }
 }
-const user = readPersistedUser()
 
 const initialState: AuthState = {
-  user: user,
-  token: token,
+  user: readPersistedUser(),
+  token: localStorage.getItem('token'),
   refreshDocuments: false,
-  refreshRegulations:false,
-  refreshRentals:false,
+  refreshRegulations: false,
+  refreshRentals: false,
   isLoading: false,
   polling: false,
   taskId: null,
-
 }
 
+// Besides the session, this slice carries the cross-page refresh toggles and the
+// rental import task, so a page can ask another to refetch without prop drilling.
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setCredentials: (
-      state,
-      action: PayloadAction<{ user: User; token: string }>
-    ) => {
+    setCredentials: (state, action: PayloadAction<{ user: User; token: string }>) => {
       state.user = action.payload.user
       state.token = action.payload.token
-      // Store token and user in localStorage
       localStorage.setItem('token', action.payload.token)
       localStorage.setItem('user', JSON.stringify(action.payload.user))
     },
     setToken: (state, action: PayloadAction<string>) => {
       state.token = action.payload
-      // Store token in localStorage
       localStorage.setItem('token', action.payload)
     },
     logout: (state) => {
       state.user = null
       state.token = null
-      // Remove token and user from localStorage
       localStorage.removeItem('token')
       localStorage.removeItem('user')
     },
-    // Action to toggle the state
     toggleRefreshDocuments: (state) => {
       state.refreshDocuments = !state.refreshDocuments
-    },
-    // Action to set the state
-    setRefreshDocuments: (state, action: PayloadAction<boolean>) => {
-      state.refreshDocuments = action.payload
     },
     toggleRefreshRegulations: (state) => {
       state.refreshRegulations = !state.refreshRegulations
     },
-    setRefreshRegulations: (state, action: PayloadAction<boolean>) => {
-      state.refreshRegulations = action.payload
-    },
     toggleRefreshRentals: (state) => {
       state.refreshRentals = !state.refreshRentals
-    },
-    setRefreshRentals: (state, action: PayloadAction<boolean>) => {
-      state.refreshRentals = action.payload
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload
     },
-
     setTask: (state, action: PayloadAction<string | null>) => {
-      state.taskId = action.payload;
+      state.taskId = action.payload
     },
     setPolling: (state, action: PayloadAction<boolean>) => {
-      state.polling = action.payload;
+      state.polling = action.payload
     },
   },
 })
 
-export const { setCredentials, setToken, logout, toggleRefreshDocuments, setRefreshDocuments, toggleRefreshRegulations, setRefreshRegulations, toggleRefreshRentals, setRefreshRentals, setLoading, setTask,
-  setPolling,} = authSlice.actions
+export const {
+  setCredentials,
+  setToken,
+  logout,
+  toggleRefreshDocuments,
+  toggleRefreshRegulations,
+  toggleRefreshRentals,
+  setLoading,
+  setTask,
+  setPolling,
+} = authSlice.actions
 export default authSlice.reducer
