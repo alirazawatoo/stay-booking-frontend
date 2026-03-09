@@ -7,7 +7,6 @@ import Chart from './Chart';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Modal from './Modal';
-import Layout from './Layout';
 
 const AdminDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,23 +67,11 @@ const AdminDashboard: React.FC = () => {
   }, [currentPage, refetch]);
 
   if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-gray-700">Loading...</div>
-        </div>
-      </Layout>
-    );
+    return <p role="status" className="p-8 text-lg text-gray-700">Loading users…</p>;
   }
   
   if (isError) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-red-500">Error loading users</div>
-        </div>
-      </Layout>
-    );
+    return <p role="alert" className="p-8 text-lg text-red-700">Error loading users.</p>;
   }
 
   return (

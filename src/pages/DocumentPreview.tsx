@@ -1,70 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
+import { usePreviewDocumentQuery } from '../services/api';
 
+// A page served over HTTPS cannot frame an http:// file, so upgrade the scheme
+// there; local development keeps the URL the API returned.
+function frameableUrl(fileUrl: string): string {
+  return window.location.protocol === 'https:' ? fileUrl.replace(/^http:\/\//, 'https://') : fileUrl;
+}
 
 const DocumentPreview: React.FC = () => {
-    const [documentUrl, setDocumentUrl] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
-    const documentId = useParams<{ documentId: string }>().documentId;
+  const { documentId } = useParams<{ documentId: string }>();
+  const { data, isLoading, isError } = usePreviewDocumentQuery(
+    { documentId: Number(documentId) },
+    { skip: !documentId },
+  );
 
-    useEffect(() => {
-        handlePreview();
-    }, [documentId]);
+  if (isLoading) {
+    return <p role="status" className="p-8 text-slate-600">Loading document…</p>;
+  }
 
-    const handlePreview = async () => {
-        const token = localStorage.getItem('token');
-    
-        if (!token) {
-            setError('No authorization token found.');
-            return;
-        }
-    
-        try {
-            const apiUrl = import.meta.env.VITE_API_URL;
-            const response = await fetch(`${apiUrl}api/documents/preview/${documentId}/`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
+  if (isError || !data?.file_url) {
+    return <p role="alert" className="p-8 text-red-700">This document could not be loaded.</p>;
+  }
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data.file_url) {
-                const secureUrl = data.file_url.replace(/^http:\/\//, 'https://');
-                setDocumentUrl(secureUrl);
-                setError(null);
-            } else {
-                throw new Error('File URL not found in response.');
-            }
-        } catch (err) {
-            console.error('Error fetching document:', err);
-            setError('Error fetching document.');
-        }
-    };
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-            {documentUrl && (
-                <div style={{ width: '100%', maxWidth: '100%', padding: '0 1rem' }}>
-                    <iframe
-                        src={documentUrl}
-                        style={{
-                            width: '100%',
-                            height: 'calc(100vh - 100px)', // Adjusts height based on viewport
-                            maxWidth: '100%',
-                            border: 'none',
-                        }}
-                        title="Document Preview"
-                    />
-                </div>
-            )}
-        </div>
-    );
+  return (
+    <div className="w-full px-4">
+      <iframe
+        src={frameableUrl(data.file_url)}
+        className="h-[calc(100vh-100px)] w-full border-0"
+        title="Document preview"
+      />
+    </div>
+  );
 };
 
 export default DocumentPreview;

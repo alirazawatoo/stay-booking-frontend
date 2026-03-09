@@ -3,7 +3,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { useGetUserProfileQuery} from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import Layout from './Layout';
 
 const UserDashboard: React.FC = () => {
   const { data: user, isLoading } = useGetUserProfileQuery(undefined);
@@ -13,23 +12,11 @@ const UserDashboard: React.FC = () => {
   // console.log('User:', user);
 
   if (isLoading) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-gray-700">Loading user information...</div>
-        </div>
-      </Layout>
-    );
+    return <p role="status" className="p-8 text-lg text-gray-700">Loading user information…</p>;
   }
   
   if (!user) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-full w-full">
-          <div className="text-lg text-red-500">No user information available.</div>
-        </div>
-      </Layout>
-    );
+    return <p role="alert" className="p-8 text-lg text-red-700">No user information available.</p>;
   }
 
 
