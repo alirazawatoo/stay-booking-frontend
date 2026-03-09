@@ -25,20 +25,19 @@ const RegulationDetail: React.FC = () => {
 
     setError('');
 
-    // Navigate immediately to the regulations page
+    // The API saves the row first and answers only after the model call finishes:
+    // return to the list, refresh it once the pending row exists, and again when done.
     navigate('/regulations');
-    
+    const showPendingRow = setTimeout(() => dispatch(toggleRefreshRegulations()), 1000);
+
     try {
-      setTimeout(() => {
-        dispatch(toggleRefreshRegulations());
-      }, 1000);
-      await createRegulation({search});
-      dispatch(toggleRefreshRegulations());
+      await createRegulation({ search }).unwrap();
       toast.success('Regulation created successfully!');
-    } catch (error) {
-      console.error('Failed to create regulation:', error);
-      // Show error toast in case of failure
+    } catch {
       toast.error('Failed to create regulation. Please try again.');
+    } finally {
+      clearTimeout(showPendingRow);
+      dispatch(toggleRefreshRegulations());
     }
   };
 

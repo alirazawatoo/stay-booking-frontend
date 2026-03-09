@@ -125,9 +125,8 @@ const RentalManagement = () => {
       // Refetch batch ids after upload
       refetchBatchIds();
     } catch (error) {
-      console.error('Failed to upload properties:', error);
-      toast.error('Failed to upload properties.');
-      dispatch(setLoading(false)); // Stop loading on error
+      dispatch(setLoading(false));
+      throw error;
     }
   };
 

@@ -30,29 +30,18 @@ const ViewNotes = () => {
   const [reviewDocuments] = useReviewDocumentsMutation();
 
   const handleUploadRevision = async (leaseId: number, formData: FormData) => {
-    try {
-      // console.log("FormData being sent:", Array.from(formData.entries()));
-      const uploadedLeaseStatus = await reviseLease({ id: leaseId, revisedData: formData }).unwrap();
-      setUploadModalOpen(false);
-      
-      // Trigger refetch
-      refetchLease();
-      refetchDocument();
+    const { document_ids: documentIds } = await reviseLease({ id: leaseId, revisedData: formData }).unwrap();
+    setUploadModalOpen(false);
+    refetchLease();
+    refetchDocument();
 
-      const documentIds = uploadedLeaseStatus.document_ids;
-
-      if (documentIds && documentIds.length > 0) {
-        try {
-          await reviewDocuments({ documentIds });
-          dispatch(toggleRefreshDocuments());
-          // console.log("Documents reviewed successfully.");
-        } catch (reviewError) {
-          console.error("Error reviewing documents:", reviewError);
-          toast.error('Failed to review documents');
-        }
+    if (documentIds?.length > 0) {
+      try {
+        await reviewDocuments({ documentIds }).unwrap();
+        dispatch(toggleRefreshDocuments());
+      } catch {
+        toast.error('The revision was saved, but it could not be sent for review.');
       }
-    } catch (error) {
-      console.error("Failed to upload revision:", error);
     }
   };
 

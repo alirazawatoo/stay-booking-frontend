@@ -55,48 +55,33 @@ const LeaseManagement = () => {
 
   const dispatch = useDispatch()
 
+  // Errors propagate to the modal, which shows the failure toast and stays open.
   const handleUploadLease = async (leaseData: FormData) => {
-    try {
-      // Upload the lease
-      const uploadedLease = await uploadLease(leaseData).unwrap();
-      refetch();
-      setUploadModalOpen(false);
+    const uploadedLease = await uploadLease(leaseData).unwrap();
+    refetch();
+    setUploadModalOpen(false);
 
-    if (uploadedLease.documents && uploadedLease.documents.length > 0) {
-      const documentIds = uploadedLease.documents.map((doc: Document) => doc.id).filter((id: number) => id); // Collect document IDs
-
+    const documentIds = (uploadedLease.documents ?? [])
+      .map((doc: Document) => doc.id)
+      .filter((id: number) => id);
+    if (documentIds.length > 0) {
       try {
-        // Review all documents at once using the reviewDocuments mutation
-        await reviewDocuments({ documentIds });
-        dispatch(toggleRefreshDocuments()) 
-        // console.log(`All documents reviewed.`);
-      } catch (reviewError) {
-        console.error(`Error reviewing documents:`, reviewError);
-        toast.error('Failed to review documents');
+        await reviewDocuments({ documentIds }).unwrap();
+        dispatch(toggleRefreshDocuments());
+      } catch {
+        toast.error('The lease was saved, but its documents could not be sent for review.');
       }
-    }
-    
-    } catch (error) {
-      console.error("Failed to upload lease:", error);
     }
   };
 
   const handleUpdateLease = async (leaseData: Lease) => {
-    try {
-      await updateLease(leaseData).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to update lease:", error);
-    }
+    await updateLease(leaseData).unwrap();
+    refetch();
   };
 
   const handleReviseLease = async (leaseId: number, revisedData: FormData) => {
-    try {
-      await reviseLease({ id: leaseId, revisedData }).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to revise lease:", error);
-    }
+    await reviseLease({ id: leaseId, revisedData }).unwrap();
+    refetch();
   };
 
   const handleSearch = (filters: any) => {
